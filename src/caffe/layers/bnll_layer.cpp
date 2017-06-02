@@ -42,6 +42,8 @@ STUB_GPU(BNLLLayer);
 #endif
 
 INSTANTIATE_CLASS(BNLLLayer);
+#ifndef USE_ACL
 REGISTER_LAYER_CLASS(BNLL);
+#endif
 
 }  // namespace caffe

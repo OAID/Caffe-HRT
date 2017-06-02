@@ -145,6 +145,8 @@ STUB_GPU(InnerProductLayer);
 #endif
 
 INSTANTIATE_CLASS(InnerProductLayer);
+#ifndef USE_ACL
 REGISTER_LAYER_CLASS(InnerProduct);
+#endif
 
 }  // namespace caffe

@@ -7,6 +7,12 @@ $(error $(CONFIG_FILE) not found. See $(CONFIG_FILE).example.)
 endif
 include $(CONFIG_FILE)
 
+ifeq ($(CPU_ONLY),1)
+	USE_CUDA := 0
+endif
+ifeq ($(USE_ACL),1)
+	USE_CUDA := 0
+endif
 BUILD_DIR_LINK := $(BUILD_DIR)
 ifeq ($(RELEASE_BUILD_DIR),)
 	RELEASE_BUILD_DIR := .$(BUILD_DIR)_release
@@ -172,13 +178,13 @@ endif
 CUDA_LIB_DIR += $(CUDA_DIR)/lib
 
 INCLUDE_DIRS += $(BUILD_INCLUDE_DIR) ./src ./include
-ifneq ($(CPU_ONLY), 1)
+ifeq ($(USE_CUDA), 1)
 	INCLUDE_DIRS += $(CUDA_INCLUDE_DIR)
 	LIBRARY_DIRS += $(CUDA_LIB_DIR)
 	LIBRARIES := cudart cublas curand
 endif
 
-LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_hl hdf5
+LIBRARIES += glog gflags protobuf boost_system boost_filesystem m 
 
 # handle IO dependencies
 USE_LEVELDB ?= 1
@@ -271,7 +277,7 @@ endif
 # libstdc++ for NVCC compatibility on OS X >= 10.9 with CUDA < 7.0
 ifeq ($(OSX), 1)
 	CXX := /usr/bin/clang++
-	ifneq ($(CPU_ONLY), 1)
+	ifeq ($(USE_CUDA), 1)
 		CUDA_VERSION := $(shell $(CUDA_DIR)/bin/nvcc -V | grep -o 'release [0-9.]*' | tr -d '[a-z ]')
 		ifeq ($(shell echo | awk '{exit $(CUDA_VERSION) < 7.0;}'), 1)
 			CXXFLAGS += -stdlib=libstdc++
@@ -296,6 +302,10 @@ ifeq ($(OSX), 1)
 	ORIGIN := @loader_path
 	VERSIONFLAGS += -Wl,-install_name,@rpath/$(DYNAMIC_VERSIONED_NAME_SHORT) -Wl,-rpath,$(ORIGIN)/../../build/lib
 else
+	ifeq (${USE_OPENMP}, 1)
+		CXXFLAGS += -fopenmp
+		LINKFLAGS += -fopenmp
+	endif
 	ORIGIN := \$$ORIGIN
 endif
 
@@ -334,6 +344,27 @@ ifeq ($(USE_NCCL), 1)
 	COMMON_FLAGS += -DUSE_NCCL
 endif
 
+# ACL acceleration configuration
+ifeq ($(USE_ACL), 1)
+        LIBRARY_DIRS += $(ACL_LIBS_DIR)
+	LIBRARIES += $(ACL_LIBS)
+	INCLUDE_DIRS +=$(ACL_INCS)
+	COMMON_FLAGS += -DUSE_ACL -std=c++11
+endif
+
+#USE_PROFILING -- get profiling informations, is controled by LOGACL
+#LAYER_PERF_STAT -- haitao's net profiling information
+ifeq ($(USE_PROFILING), 1)
+	COMMON_FLAGS += -DUSE_PROFILING -DLAYER_PERF_STAT
+endif
+#HDF5
+ifeq ($(USE_HDF5), 1)
+        LIBRARY_DIRS += $(HDF5_LIBRARY_DIRS)
+	LIBRARIES += $(HDF5_LIBRARIES)
+	INCLUDE_DIRS +=$(HDF5_INCLUDE_DIRS)
+	COMMON_FLAGS += -DUSE_HDF5
+endif
+
 # configure IO libraries
 ifeq ($(USE_OPENCV), 1)
 	COMMON_FLAGS += -DUSE_OPENCV
@@ -358,6 +389,15 @@ ifeq ($(CPU_ONLY), 1)
 	COMMON_FLAGS += -DCPU_ONLY
 endif
 
+ifeq ($(USE_ACL), 1)
+	OBJS := $(PROTO_OBJS) $(CXX_OBJS)
+	TEST_OBJS := $(TEST_CXX_OBJS)
+	TEST_BINS := $(TEST_CXX_BINS)
+	ALL_WARNS := $(ALL_CXX_WARNS)
+	TEST_FILTER := --gtest_filter="-*GPU*"
+	COMMON_FLAGS += -DCPU_ONLY
+endif
+
 # Python layer support
 ifeq ($(WITH_PYTHON_LAYER), 1)
 	COMMON_FLAGS += -DWITH_PYTHON_LAYER
@@ -365,7 +405,8 @@ ifeq ($(WITH_PYTHON_LAYER), 1)
 endif
 
 # BLAS configuration (default = ATLAS)
-BLAS ?= atlas
+#BLAS ?= atlas
+BLAS ?= open
 ifeq ($(BLAS), mkl)
 	# MKL
 	LIBRARIES += mkl_rt

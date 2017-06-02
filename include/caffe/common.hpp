@@ -145,7 +145,13 @@ class Caffe {
   // into the program since that may cause allocation of pinned memory being
   // freed in a non-pinned way, which may cause problems - I haven't verified
   // it personally but better to note it here in the header file.
-  inline static void set_mode(Brew mode) { Get().mode_ = mode; }
+#ifdef USE_ACL  
+  inline static bool arm_gpu_mode() {return Get().use_mali_gpu_;}
+  inline static void set_mode(Brew mode) { Get().mode_ = CPU;  set_arm_gpu_mode(mode==GPU);}
+  inline static void set_arm_gpu_mode(bool use_mali_gpu) { Get().use_mali_gpu_ = use_mali_gpu;}
+#else
+  inline static void set_mode(Brew mode) { Get().mode_ = mode;}
+#endif
   // Sets the random seed of both boost and curand
   static void set_random_seed(const unsigned int seed);
   // Sets the device. Since we have cublas and curand stuff, set device also
@@ -175,7 +181,9 @@ class Caffe {
   shared_ptr<RNG> random_generator_;
 
   Brew mode_;
-
+#ifdef USE_ACL  
+  bool use_mali_gpu_;
+#endif
   // Parallel training
   int solver_count_;
   int solver_rank_;

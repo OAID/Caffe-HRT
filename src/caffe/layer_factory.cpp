@@ -27,6 +27,19 @@
 #include "caffe/layers/cudnn_tanh_layer.hpp"
 #endif
 
+#ifdef USE_ACL
+#include "caffe/layers/acl_absval_layer.hpp"
+#include "caffe/layers/acl_bnll_layer.hpp"
+#include "caffe/layers/acl_conv_layer.hpp"
+#include "caffe/layers/acl_inner_product_layer.hpp"
+#include "caffe/layers/acl_lrn_layer.hpp"
+#include "caffe/layers/acl_pooling_layer.hpp"
+#include "caffe/layers/acl_relu_layer.hpp"
+#include "caffe/layers/acl_sigmoid_layer.hpp"
+#include "caffe/layers/acl_softmax_layer.hpp"
+#include "caffe/layers/acl_tanh_layer.hpp"
+#endif
+
 #ifdef WITH_PYTHON_LAYER
 #include "caffe/layers/python_layer.hpp"
 #endif
@@ -39,6 +52,9 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
     const LayerParameter& param) {
   ConvolutionParameter conv_param = param.convolution_param();
   ConvolutionParameter_Engine engine = conv_param.engine();
+#ifdef USE_ACL
+  return shared_ptr<Layer<Dtype> >(new ACLConvolutionLayer<Dtype>(param));
+#endif  
 #ifdef USE_CUDNN
   bool use_dilation = false;
   for (int i = 0; i < conv_param.dilation_size(); ++i) {
@@ -77,6 +93,9 @@ REGISTER_LAYER_CREATOR(Convolution, GetConvolutionLayer);
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetPoolingLayer(const LayerParameter& param) {
   PoolingParameter_Engine engine = param.pooling_param().engine();
+#ifdef USE_ACL
+  return shared_ptr<Layer<Dtype> >(new ACLPoolingLayer<Dtype>(param));
+#endif  
   if (engine == PoolingParameter_Engine_DEFAULT) {
     engine = PoolingParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
@@ -115,7 +134,9 @@ REGISTER_LAYER_CREATOR(Pooling, GetPoolingLayer);
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetLRNLayer(const LayerParameter& param) {
   LRNParameter_Engine engine = param.lrn_param().engine();
-
+#ifdef USE_ACL
+  return shared_ptr<Layer<Dtype> >(new ACLLRNLayer<Dtype>(param));
+#endif  
   if (engine == LRNParameter_Engine_DEFAULT) {
 #ifdef USE_CUDNN
     engine = LRNParameter_Engine_CUDNN;
@@ -153,6 +174,9 @@ REGISTER_LAYER_CREATOR(LRN, GetLRNLayer);
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetReLULayer(const LayerParameter& param) {
   ReLUParameter_Engine engine = param.relu_param().engine();
+#ifdef USE_ACL
+  return shared_ptr<Layer<Dtype> >(new ACLReLULayer<Dtype>(param));
+#endif    
   if (engine == ReLUParameter_Engine_DEFAULT) {
     engine = ReLUParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
@@ -177,6 +201,9 @@ REGISTER_LAYER_CREATOR(ReLU, GetReLULayer);
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetSigmoidLayer(const LayerParameter& param) {
   SigmoidParameter_Engine engine = param.sigmoid_param().engine();
+#ifdef USE_ACL
+  return shared_ptr<Layer<Dtype> >(new ACLSigmoidLayer<Dtype>(param));
+#endif    
   if (engine == SigmoidParameter_Engine_DEFAULT) {
     engine = SigmoidParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
@@ -201,6 +228,9 @@ REGISTER_LAYER_CREATOR(Sigmoid, GetSigmoidLayer);
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetSoftmaxLayer(const LayerParameter& param) {
   SoftmaxParameter_Engine engine = param.softmax_param().engine();
+#ifdef USE_ACL
+  return shared_ptr<Layer<Dtype> >(new ACLSoftmaxLayer<Dtype>(param));
+#endif    
   if (engine == SoftmaxParameter_Engine_DEFAULT) {
     engine = SoftmaxParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
@@ -225,6 +255,9 @@ REGISTER_LAYER_CREATOR(Softmax, GetSoftmaxLayer);
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetTanHLayer(const LayerParameter& param) {
   TanHParameter_Engine engine = param.tanh_param().engine();
+#ifdef USE_ACL
+  return shared_ptr<Layer<Dtype> >(new ACLTanHLayer<Dtype>(param));
+#endif    
   if (engine == TanHParameter_Engine_DEFAULT) {
     engine = TanHParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
@@ -244,6 +277,33 @@ shared_ptr<Layer<Dtype> > GetTanHLayer(const LayerParameter& param) {
 }
 
 REGISTER_LAYER_CREATOR(TanH, GetTanHLayer);
+
+#ifdef USE_ACL
+// Get AbsVal layer according to engine.
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetAbsValLayer(const LayerParameter& param) {
+  return shared_ptr<Layer<Dtype> >(new ACLAbsValLayer<Dtype>(param));
+}
+
+REGISTER_LAYER_CREATOR(AbsVal, GetAbsValLayer);
+
+// Get BNLL layer according to engine.
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetBNLLLayer(const LayerParameter& param) {
+  return shared_ptr<Layer<Dtype> >(new ACLBNLLLayer<Dtype>(param));
+}
+
+REGISTER_LAYER_CREATOR(BNLL, GetBNLLLayer);
+
+// Get InnerProduct layer according to engine.
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetInnerProductLayer(const LayerParameter& param) {
+  return shared_ptr<Layer<Dtype> >(new ACLInnerProductLayer<Dtype>(param));
+}
+
+REGISTER_LAYER_CREATOR(InnerProduct, GetInnerProductLayer);
+
+#endif // USE_ACL
 
 #ifdef WITH_PYTHON_LAYER
 template <typename Dtype>

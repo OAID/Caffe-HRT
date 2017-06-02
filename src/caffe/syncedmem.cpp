@@ -54,7 +54,9 @@ inline void SyncedMemory::to_cpu() {
     caffe_gpu_memcpy(size_, gpu_ptr_, cpu_ptr_);
     head_ = SYNCED;
 #else
+#ifndef USE_ACL
     NO_GPU;
+#endif
 #endif
     break;
   case HEAD_AT_CPU:
@@ -113,8 +115,13 @@ const void* SyncedMemory::gpu_data() {
   to_gpu();
   return (const void*)gpu_ptr_;
 #else
+#ifdef USE_ACL
+  to_cpu();
+  return (const void*)cpu_ptr_;
+#else
   NO_GPU;
   return NULL;
+#endif
 #endif
 }
 
@@ -129,7 +136,13 @@ void SyncedMemory::set_gpu_data(void* data) {
   head_ = HEAD_AT_GPU;
   own_gpu_data_ = false;
 #else
+#ifdef USE_ACL
+  gpu_ptr_ = data;
+  head_ = HEAD_AT_GPU;
+  own_gpu_data_ = false;
+#else
   NO_GPU;
+#endif
 #endif
 }
 
@@ -147,8 +160,14 @@ void* SyncedMemory::mutable_gpu_data() {
   head_ = HEAD_AT_GPU;
   return gpu_ptr_;
 #else
+#ifdef USE_ACL
+  to_cpu();
+  head_ = HEAD_AT_GPU;
+  return cpu_ptr_;
+#else
   NO_GPU;
   return NULL;
+#endif
 #endif
 }
 

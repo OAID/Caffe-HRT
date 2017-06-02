@@ -4,6 +4,12 @@
 #ifndef CAFFE_CAFFE_HPP_
 #define CAFFE_CAFFE_HPP_
 
+#ifdef USE_ACL
+#ifndef CPU_ONLY
+#define CPU_ONLY
+#endif
+#endif
+
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
 #include "caffe/filler.hpp"

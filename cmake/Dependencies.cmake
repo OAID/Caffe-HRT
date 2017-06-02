@@ -66,6 +66,21 @@ if(USE_LEVELDB)
   list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_LEVELDB)
 endif()
 
+# ---[ ACL
+if(USE_ACL)
+  find_package(ACL REQUIRED)
+  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${ACL_INCLUDE})
+  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${ACL_INCLUDE}/include)
+  set(__list ${ACL_LIBRARIES})
+  separate_arguments(__list)
+    list(REMOVE_DUPLICATES __list)
+    foreach(i ${__list})
+        list(APPEND Caffe_LINKER_LIBS PUBLIC ${i})
+    endforeach()
+  list(APPEND Caffe_COMPILE_OPTIONS PRIVATE -std=c++11)
+  list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_ACL)
+endif()
+
 # ---[ Snappy
 if(USE_LEVELDB)
   find_package(Snappy REQUIRED)

@@ -10,7 +10,11 @@
 #include "caffe/layer_factory.hpp"
 #include "caffe/proto/caffe.pb.h"
 #include "caffe/util/math_functions.hpp"
-
+#ifdef USE_PROFILING
+#include <sys/time.h>
+#define	NANO_SEC_CONV 1000000
+extern unsigned int acl_log_flags;
+#endif //USE_PROFILING
 /**
  Forward declare boost::thread instead of including boost/thread.hpp
  to avoid a boost/NVCC issues (#1009, #1010) on OSX.
@@ -18,6 +22,64 @@
 namespace boost { class mutex; }
 
 namespace caffe {
+#ifdef USE_PROFILING
+class logtime_util
+{
+  public:
+    logtime_util(int mask_, const char* information_){
+      mask = mask_;
+      if(acl_log_flags & mask){
+        strncpy(information, information_, 255);
+        gettimeofday(&tv[0], NULL);
+      }
+    }
+    ~logtime_util(){
+      if(acl_log_flags & mask){
+        long time[2];
+        gettimeofday(&tv[1], NULL);
+        time[0] = tv[0].tv_sec * NANO_SEC_CONV + tv[0].tv_usec;
+        time[1]   = tv[1].tv_sec * NANO_SEC_CONV + tv[1].tv_usec;
+        printf("%s %.6lf\n", information, (((double)time[1] - time[0]) / NANO_SEC_CONV));
+      }
+    }
+    void log_time(bool start)
+    {
+      if(acl_log_flags & mask){
+        if (start){
+          gettimeofday(&tv[0], NULL);
+        }
+        else{
+          long time[2];
+          gettimeofday(&tv[1], NULL);
+          time[0] = tv[0].tv_sec * NANO_SEC_CONV + tv[0].tv_usec;
+          time[1]   = tv[1].tv_sec * NANO_SEC_CONV + tv[1].tv_usec;
+          printf("%s %.6lf\n", information, (((double)time[1] - time[0]) / NANO_SEC_CONV));
+        }
+      }
+    }
+private:
+  struct timeval tv[2];
+  int mask;
+  char information[256];
+};
+
+#ifdef LAYER_PERF_STAT
+
+struct perf_stat {
+
+uint64_t total;
+uint32_t start;
+uint32_t end;
+uint32_t used;
+uint32_t count;
+
+perf_stat(): total(0),start(0),end(0),count(0){};
+
+};
+
+
+#endif
+#endif //USE_PROFILING
 
 /**
  * @brief An interface for the units of computation which can be composed into a
@@ -123,8 +185,13 @@ class Layer {
    *
    * Your layer should implement Forward_cpu and (optionally) Forward_gpu.
    */
+#ifdef USE_PROFILING
+   Dtype Forward(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+#else
   inline Dtype Forward(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
+#endif //USE_PROFILING
 
   /**
    * @brief Given the top blob error gradients, compute the bottom blob error
@@ -290,7 +357,19 @@ class Layer {
     }
     param_propagate_down_[param_id] = value;
   }
+  
+#ifdef USE_PROFILING
 
+#ifdef LAYER_PERF_STAT
+
+   const vector<Blob<Dtype>*> * saved_top;
+   const vector<Blob<Dtype>*> * saved_bottom;
+   perf_stat * get_time_stat(void) { return &time_stat_;}
+   perf_stat * get_pmu_stat(int index) { return &pmu_stat_[index];}
+
+#endif
+
+#endif //USE_PROFILING
 
  protected:
   /** The protobuf that stores the layer parameters */
@@ -404,8 +483,17 @@ class Layer {
 
  private:
   DISABLE_COPY_AND_ASSIGN(Layer);
+
+#ifdef USE_PROFILING
+#ifdef LAYER_PERF_STAT
+  perf_stat time_stat_;
+  perf_stat pmu_stat_[16];
+#endif
+#endif //USE_PROFILING
 };  // class Layer
 
+
+#ifndef LAYER_PERF_STAT
 // Forward and backward wrappers. You should implement the cpu and
 // gpu specific implementations instead, and should not change these
 // functions.
@@ -444,6 +532,8 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
   }
   return loss;
 }
+
+#endif
 
 template <typename Dtype>
 inline void Layer<Dtype>::Backward(const vector<Blob<Dtype>*>& top,

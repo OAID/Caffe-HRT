@@ -7,7 +7,11 @@
 
 // Stub out GPU calls as unavailable.
 
+#ifdef USE_ACL
+#define NO_GPU 
+#else
 #define NO_GPU LOG(FATAL) << "Cannot use GPU in CPU-only Caffe: check mode."
+#endif
 
 #define STUB_GPU(classname) \
 template <typename Dtype> \
