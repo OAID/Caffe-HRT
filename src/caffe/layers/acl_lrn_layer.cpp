@@ -5,6 +5,7 @@
 
 namespace caffe {
 
+const NormType IN_MAP=(arm_compute::NormType)0;
 template <typename Dtype>
 void ACLLRNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
@@ -28,7 +29,7 @@ void ACLLRNLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
     //this->force_bypass_acl_path_=false;
     NormalizationLayerInfo *norm_info;
     if(this->layer_param_.lrn_param().norm_region() == LRNParameter_NormRegion_WITHIN_CHANNEL)
-       norm_info=new NormalizationLayerInfo(NormType::IN_MAP, this->size_, this->alpha_, this->beta_, this->k_);
+       norm_info=new NormalizationLayerInfo(IN_MAP, this->size_, this->alpha_, this->beta_, this->k_);
     else
        norm_info=new NormalizationLayerInfo(NormType::CROSS_MAP, this->size_, this->alpha_, this->beta_, this->k_);
 
