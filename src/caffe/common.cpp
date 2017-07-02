@@ -7,6 +7,8 @@
 #include "caffe/common.hpp"
 #include "caffe/util/rng.hpp"
 #ifdef USE_ACL
+#include <exception>
+
 #include "arm_compute/runtime/CL/CLScheduler.h"
 using namespace arm_compute;
 #endif
@@ -59,7 +61,15 @@ Caffe::Caffe()
     : random_generator_(), mode_(Caffe::CPU),use_mali_gpu_(false),
       solver_count_(1), solver_rank_(0), multiprocess_(false) {
 #ifdef USE_ACL
-    CLScheduler::get().default_init();
+
+   try {
+       CLScheduler::get().default_init();
+   }
+   catch(std::exception& e)
+   {
+       std::cout << "OPENCL initialization failed"<< std::endl;
+   }
+
 #endif
 }
 
