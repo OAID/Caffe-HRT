@@ -1,4 +1,4 @@
-![OPEN AI LAB](https://github.com/OAID/caffeOnACL/blob/master/acl_openailab/pics/openailab.png)
+![OPEN AI LAB](https://oaid.github.io/pics/openailab.png)
 
 # 1. Release Notes
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
