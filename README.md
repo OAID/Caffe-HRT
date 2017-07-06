@@ -4,7 +4,7 @@
 CaffeOnACL is a project to use ARM Compute Library (NEON+GPU) to speed up caffe and provide utilities to debug, profile and tune application performance.
 
 Check out the documents for the details like
-- [release notes](https://github.com/OAID/caffeOnACL/tree/master/docs/caffeOnACL_release_notes_0_2_0.docx)
+- [release notes](https://github.com/OAID/caffeOnACL/tree/master/acl_openailab/README.md)
 - [user guide](https://github.com/OAID/caffeOnACL/tree/master/docs/caffeOnACL_user_guide_0_2_0.docx)
 
 
