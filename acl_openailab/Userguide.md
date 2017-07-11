@@ -13,7 +13,7 @@ There are two ways to use the libraris after build them.
 
 ### Or, install libraries to a temporarily directory. then set the environment variable LD_LIBRARY_PATH is this direcotry. For example, install libraries to `~oaid`
 	mkdir ~/oaid/lib
-	cp ~/oaid/ComputeLibrary/build/arm_compute/libarm_compute.so ~oaid/lib/.
+	cp ~/oaid/ComputeLibrary/build/libarm_compute.so ~oaid/lib/.
 	cp ~/oaid//caffeOnACL/distribute/lib/libcaffe.so ~/oaid/lib/.
 	export LD_LIBRARY_PATH=~/oaid/lib
 
@@ -96,9 +96,9 @@ Assume your working directory is : ~\test
 
 * Run your application and get the information of performance
 
-	./your_application parameters°≠
+	./your_application parameters‚Ä¶
 
-* When got the log, copy it into Microsoft excel, and sum the columns. For examle, run the AlexNet as the example ®C command line is : 
+* When got the log, copy it into Microsoft excel, and sum the columns. For examle, run the AlexNet as the example ‚Äì command line is : 
 
 	taskset -a 10 ./distribute/bin/classification.bin ./models/bvlc_alexnet/deploy.prototxt ./models/bvlc_alexnet/bvlc_alexnet.caffemodel data/ilsvrc12/imagenet_mean.binaryproto data/ilsvrc12/synset_words.txt  examples/images/cat.jpg
 ![AlexNet_acl_perflog_excel_pic](https://oaid.github.io/pics/caffeonacl/AlexNet_acl_perflog_excel_pic.png)
@@ -108,22 +108,23 @@ Assume your work directory is ~\test.
 
 * to use all ACL layers by set BYPASSACL to 0xffffffff
 	export BYPASSACL=0xffffffff
-* If compile the caffeOnACL with "USE_PROFILING := 1", to decide which information is logged into file by setting LOGACL. For instance, we log all layers' information by setting LOGACL to 0x7fe1. (In this case, ENABLE_LOG_ALLOCATE°¢ENABLE_LOG_RUN°¢ENABLE_LOG_CONFIG and ENABLE_LOG_COPY are invalidate, these flags are all for ACL layers)
+* If compile the caffeOnACL with "USE_PROFILING := 1", to decide which information is logged into file by setting LOGACL. For instance, we log all layers' information by setting LOGACL to 0x7fe1. (In this case, ENABLE_LOG_ALLOCATE„ÄÅENABLE_LOG_RUN„ÄÅENABLE_LOG_CONFIG and ENABLE_LOG_COPY are invalidate, these flags are all for ACL layers)
 
 	export LOGACL=0x7fe1
 
 * Run your application and get the information of performance
 
-	./your_application parameters°≠
+	./your_application parameters‚Ä¶
 * When got the log, we can copy it into Microsoft excel, and sum the columns
 ![AlexNet_origin_perflog_excel_pic](https://oaid.github.io/pics/caffeonacl/AlexNet_origin_perflog_excel_pic.png)
 
-## 4.3 Improve the performance by mixing ACL Layers and Caffe°Øs original Layers
+## 4.3 Improve the performance by mixing ACL Layers and Caffe‚Äôs original Layers
 After retrieving the performance statistic data of Caffe's layers and ACL's layers in your application, we can compare their respective performances:
 ![AlexNet_acl_vs_openblas_perf_pic](https://oaid.github.io/pics/caffeonacl/AlexNet_acl_vs_openblas_perf_pic.png)
 
-From the table above, we can observe that in the original caffe°Øs layer, CONV°¢FC°¢RELU and Softmax have faster running times than ACL°Øs layers. Therefore, we can set BYPASSACL to 0x14c to BYPASS the 4 ACL layers, and utilize the original caffe°Øs layers in the application. By choosing the layerset with the faster running time for each layer, we can optimize the total running time for this application
+From the table above, we can observe that in the original caffe‚Äôs layer, CONV„ÄÅFC„ÄÅRELU and Softmax have faster running times than ACL‚Äôs layers. Therefore, we can set BYPASSACL to 0x14c to BYPASS the 4 ACL layers, and utilize the original caffe‚Äôs layers in the application. By choosing the layerset with the faster running time for each layer, we can optimize the total running time for this application
 #### The performance data is :
 ![performance_data_excel_pic](https://oaid.github.io/pics/caffeonacl/performance_data_excel_pic.png)
 
-As you can see, we obtain optimal performance in combined mode (ACL: LRN°¢Pooling£¨Caffe°Øs original Layers£∫Conv°¢FC°¢RELU°¢Softmax) as in the table below:
+As you can see, we obtain optimal performance in combined mode (ACL: LRN„ÄÅPoolingÔºåCaffe‚Äôs original LayersÔºöConv„ÄÅFC„ÄÅRELU„ÄÅSoftmax) as in the table below:
+![performance_summary_pic](https://oaid.github.io/pics/caffeonacl/performance_summary_pic.png)
