@@ -3,6 +3,7 @@
 
 #ifdef USE_ACL
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -14,6 +15,14 @@
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
+#include "arm_compute/runtime/NEON/functions/NELocallyConnectedLayer.h"
+#include "arm_compute/runtime/CL/functions/CLLocallyConnectedLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
+#include "arm_compute/core/NEON/kernels/NEDepthConcatenateKernel.h"
+#include "arm_compute/runtime/NEON/functions/NEDepthConcatenate.h"
+#include "arm_compute/core/CL/kernels/CLDepthConcatenateKernel.h"
+#include "arm_compute/runtime/CL/functions/CLDepthConcatenate.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -28,6 +37,9 @@ using namespace arm_compute;
 #define FLAGS_ENABLE_ACL_SIGMOID   0x00000080
 #define FLAGS_ENABLE_ACL_SOFTMAX   0x00000100
 #define FLAGS_ENABLE_ACL_TANH      0x00000200
+#define FLAGS_ENABLE_ACL_LC        0x00000400
+#define FLAGS_ENABLE_ACL_BN        0x00000800
+#define FLAGS_ENABLE_ACL_CONCAT    0x00001000
 extern unsigned int bypass_acl_class_layer;
 #endif
 #ifdef USE_PROFILING
@@ -48,6 +60,9 @@ extern unsigned int bypass_acl_class_layer;
 #define MASK_LOG_SIGMOID  0x00001000
 #define MASK_LOG_SOFTMAX  0x00002000
 #define MASK_LOG_TANH     0x00004000
+#define MASK_LOG_LC       0x00008000
+#define MASK_LOG_BN       0x00010000
+#define MASK_LOG_CONCAT   0x00020000
 #define APP_TIME_INFO     MASK_LOG_APP_TIME,"time:       \t"
 #define ACL_ALLOCATE_INFO MASK_LOG_ALLOCATE,"allocate:   \t\t"
 #define ACL_RUN_INFO      MASK_LOG_RUN,     "run:        \t\t\t"
@@ -63,6 +78,9 @@ extern unsigned int bypass_acl_class_layer;
 #define ACL_SIGMOID_INFO  MASK_LOG_SIGMOID, "ACL_SIGMOID:\t\t\t\t\t\t\t\t\t\t\t\t\t"
 #define ACL_SOFTMAX_INFO  MASK_LOG_SOFTMAX, "ACL_SOFTMAX:\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
 #define ACL_TANH_INFO     MASK_LOG_TANH,    "ACL_TANH   :\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+#define ACL_LC_INFO       MASK_LOG_LC,      "ACL_LC     :\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+#define ACL_BN_INFO       MASK_LOG_BN,      "ACL_BN     :\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+#define ACL_CONCAT_INFO   MASK_LOG_CONCAT,  "ACL_CONCAT :\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
 extern unsigned int acl_log_flags;
 #endif //USE_PROFILING
 namespace caffe {
@@ -72,6 +90,7 @@ enum TensorType{
     tensor_output,
     tensor_weights,
     tensor_biases,
+    tensor_data,
 };
 template <typename ACLTensor>
 class BaseTensor:public ACLTensor{
@@ -88,7 +107,7 @@ public:
     };
     virtual void map(bool blocking = true){}
     virtual void unmap(){}
-    virtual void commit();
+    virtual void commit(TensorType type=tensor_data);
     int tensor_copy(void * mem, bool toTensor=true);
 protected:
     void* mem_;
@@ -129,20 +148,16 @@ class ACLXPUBaseLayer{
 public:
     virtual void commit(){
         if (input) {
-            input->settensortype(tensor_input);
-            input->commit();
+            input->commit(tensor_input);
         }
         if (output){
-            output->settensortype(tensor_output);
-            output->commit();
+            output->commit(tensor_output);
         }
         if (weights){
-            weights->settensortype(tensor_weights);
-            weights->commit();
+            weights->commit(tensor_weights);
         }
         if (biases){
-            biases->settensortype(tensor_biases);
-            biases->commit();
+            biases->commit(tensor_biases);
         }
     }
     virtual void run(bool gpu){
@@ -163,6 +178,10 @@ public:
         output=nullptr;
         weights=nullptr;
         biases=nullptr;
+        mean=nullptr;
+        var=nullptr;
+        beta=nullptr;
+        gamma=nullptr;
 #ifdef USE_CONV_CACHE
         for(int i = 0; i < 16; ++i){
            cache.layer[i] = nullptr;
@@ -180,12 +199,20 @@ public:
         if (output) delete output;
         if (weights) delete weights;
         if (biases) delete biases;
+        if (mean) delete mean;
+        if (var) delete var;
+        if (beta) delete beta;
+        if (gamma) delete gamma;
 #endif //USE_CONV_CACHE    
         layer=nullptr;
         input=nullptr;
         output=nullptr;
         weights=nullptr;
         biases=nullptr;
+        mean=nullptr;
+        var=nullptr;
+        beta=nullptr; 
+        gamma=nullptr;
     }
     virtual ~ACLXPUBaseLayer(){
         freelayer();
@@ -195,6 +222,11 @@ public:
     ACLTensor *output;
     ACLTensor *weights;
     ACLTensor *biases;
+    //for BN
+    ACLTensor *mean;
+    ACLTensor *var;
+    ACLTensor *beta; 
+    ACLTensor *gamma;
 #ifdef USE_CONV_CACHE
     struct{
         ACLLayer *layer[16];
@@ -223,7 +255,7 @@ public:
     bool checkreshape(TensorShape shape,bool gpu=false, TensorType type=tensor_input);
     template <typename ACLTensor> bool tensor_mem(ACLTensor *tensor,void *mem,bool share=false);
     template <typename ACLTensor> bool tensor_mem(void *mem,ACLTensor *tensor,bool share=false);
-    template <typename ACLTensor> ACLTensor * new_tensor(TensorShape shape,void *mem=nullptr,bool share=false);
+    template <typename ACLTensor> bool new_tensor(ACLTensor *&tensor,TensorShape shape,void *mem=nullptr,bool share=false);
 protected:
     ACLXPUBaseLayer<GPULayer,GPUTensor> gpu_;
     ACLXPUBaseLayer<CPULayer,CPUTensor> cpu_;
@@ -238,9 +270,9 @@ protected:
   template class ACLBaseLayer<GPULayer,CPULayer>; 
 
 #define INSTANTIATE_ACLBASE_FUNCTION(GPULayer,CPULayer,ACLTensor) \
-    template bool ACLBaseLayer<GPULayer,CPULayer>::tensor_mem<ACLTensor>(ACLTensor *tensor,void *mem,bool share); \
+    template bool ACLBaseLayer<GPULayer,CPULayer>::tensor_mem(ACLTensor *tensor,void *mem,bool share); \
     template bool ACLBaseLayer<GPULayer,CPULayer>::tensor_mem(void *mem,ACLTensor *tensor,bool share); \
-    template ACLTensor * ACLBaseLayer<GPULayer,CPULayer>::new_tensor(TensorShape shape,void *mem,bool share); \
+    template bool ACLBaseLayer<GPULayer,CPULayer>::new_tensor(ACLTensor *&tensor,TensorShape shape,void *mem,bool share); \
 
 
 #endif

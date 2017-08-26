@@ -3,12 +3,11 @@
 #include <cmath>
 #include <cstdio>
 #include <ctime>
+#include <exception>
 
 #include "caffe/common.hpp"
 #include "caffe/util/rng.hpp"
 #ifdef USE_ACL
-#include <exception>
-
 #include "arm_compute/runtime/CL/CLScheduler.h"
 using namespace arm_compute;
 #endif

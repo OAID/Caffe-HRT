@@ -33,8 +33,8 @@ void ACLSoftmaxLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
     if (Caffe::arm_gpu_mode()) {
         Dtype *top_data = top[0]->mutable_gpu_data(); 
         const Dtype* bottom_data = bottom[0]->gpu_data();
-        this->gpu().input=new_tensor<GPUTensor>(shape,(void*)bottom_data);
-        this->gpu().output=new_tensor<GPUTensor>(shape,(void*)top_data);
+        new_tensor(this->gpu().input,shape,(void*)bottom_data);
+        new_tensor(this->gpu().output,shape,(void*)top_data);
 #ifdef USE_PROFILING
         logtime_util log_time(ACL_CONFIG_INFO);
 #endif //USE_PROFILING
@@ -42,8 +42,8 @@ void ACLSoftmaxLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
     }else{
         Dtype *top_data = top[0]->mutable_cpu_data(); 
         const Dtype* bottom_data = bottom[0]->cpu_data();
-        this->cpu().input=new_tensor<CPUTensor>(shape,(void*)bottom_data);
-        this->cpu().output=new_tensor<CPUTensor>(shape,(void*)top_data);
+        new_tensor(this->cpu().input,shape,(void*)bottom_data);
+        new_tensor(this->cpu().output,shape,(void*)top_data);
 #ifdef USE_PROFILING
         logtime_util log_time(ACL_CONFIG_INFO);
 #endif //USE_PROFILING

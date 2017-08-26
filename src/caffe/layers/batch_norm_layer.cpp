@@ -247,5 +247,7 @@ STUB_GPU(BatchNormLayer);
 #endif
 
 INSTANTIATE_CLASS(BatchNormLayer);
+#ifndef USE_ACL
 REGISTER_LAYER_CLASS(BatchNorm);
+#endif
 }  // namespace caffe

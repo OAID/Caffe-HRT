@@ -39,17 +39,17 @@ void ACLInnerProductLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bott
         Dtype *top_data = top[0]->mutable_gpu_data(); 
         const Dtype* bottom_data = bottom[0]->gpu_data();
         if (transpose) {
-            this->gpu().weights=new_tensor<GPUTensor>(weights_shape_t,(void*)(this->blobs_[0].get()->mutable_gpu_data()));
+            new_tensor(this->gpu().weights,weights_shape_t,(void*)(this->blobs_[0].get()->mutable_gpu_data()));
         }else{
-            this->gpu().weights=new_tensor<GPUTensor>(weights_shape,(void*)(this->blobs_[0].get()->mutable_gpu_data()));
+            new_tensor(this->gpu().weights,weights_shape,(void*)(this->blobs_[0].get()->mutable_gpu_data()));
         }
         tensor_mem(this->gpu().weights,(void*)(this->blobs_[0].get()->mutable_gpu_data()));
         if (this->bias_term_) {
-            this->gpu().biases=new_tensor<GPUTensor>(biases_shape,(void*)(this->blobs_[1].get()->mutable_gpu_data()));
+            new_tensor(this->gpu().biases,biases_shape,(void*)(this->blobs_[1].get()->mutable_gpu_data()));
             tensor_mem(this->gpu().biases,(void*)(this->blobs_[1].get()->mutable_gpu_data()));
         }
-        this->gpu().input=new_tensor<GPUTensor>(input_shape,(void*)bottom_data);
-        this->gpu().output=new_tensor<GPUTensor>(output_shape,(void*)top_data);
+        new_tensor(this->gpu().input,input_shape,(void*)bottom_data);
+        new_tensor(this->gpu().output,output_shape,(void*)top_data);
 #ifdef USE_PROFILING
         logtime_util log_time(ACL_CONFIG_INFO);
 #endif //USE_PROFILING
@@ -58,17 +58,17 @@ void ACLInnerProductLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bott
         Dtype *top_data = top[0]->mutable_cpu_data(); 
         const Dtype* bottom_data = bottom[0]->cpu_data();
         if (transpose) {
-            this->cpu().weights=new_tensor<CPUTensor>(weights_shape_t,(void*)(this->blobs_[0].get()->mutable_cpu_data()));
+            new_tensor(this->cpu().weights,weights_shape_t,(void*)(this->blobs_[0].get()->mutable_cpu_data()));
         }else{
-            this->cpu().weights=new_tensor<CPUTensor>(weights_shape,(void*)(this->blobs_[0].get()->mutable_cpu_data()));
+            new_tensor(this->cpu().weights,weights_shape,(void*)(this->blobs_[0].get()->mutable_cpu_data()));
         }
         tensor_mem(this->cpu().weights,(void*)(this->blobs_[0].get()->mutable_cpu_data()));
         if (this->bias_term_) {
-            this->cpu().biases=new_tensor<CPUTensor>(biases_shape,(void*)(this->blobs_[1].get()->mutable_cpu_data()));
+            new_tensor(this->cpu().biases,biases_shape,(void*)(this->blobs_[1].get()->mutable_cpu_data()));
             tensor_mem(this->cpu().biases,(void*)(this->blobs_[1].get()->mutable_cpu_data()));
         }
-        this->cpu().input=new_tensor<CPUTensor>(input_shape,(void*)bottom_data);
-        this->cpu().output=new_tensor<CPUTensor>(output_shape,(void*)top_data);
+        new_tensor(this->cpu().input,input_shape,(void*)bottom_data);
+        new_tensor(this->cpu().output,output_shape,(void*)top_data);
 #ifdef USE_PROFILING
         logtime_util log_time(ACL_CONFIG_INFO);
 #endif //USE_PROFILING

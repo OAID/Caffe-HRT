@@ -28,6 +28,9 @@ unsigned int acl_log_flags = (0 | \
                               MASK_LOG_SIGMOID  | \
                               MASK_LOG_SOFTMAX  | \
                               MASK_LOG_TANH     | \
+                              MASK_LOG_LC       | \
+                              MASK_LOG_BN       | \
+                              MASK_LOG_CONCAT   | \
                               0);                                          
 #include <stdio.h>      /* printf */
 #include <stdlib.h>     /* getenv */
@@ -75,20 +78,21 @@ template <typename GPULayer, typename CPULayer>
 ACLBaseLayer<GPULayer,CPULayer>::~ACLBaseLayer(){
 }
 template <typename GPULayer, typename CPULayer>
-template <typename ACLTensor> ACLTensor * ACLBaseLayer<GPULayer,CPULayer>::new_tensor(TensorShape shape,void *mem,bool share)
+template <typename ACLTensor> bool ACLBaseLayer<GPULayer,CPULayer>::new_tensor(ACLTensor *&tensor,TensorShape shape,void *mem,bool share)
 {
-    ACLTensor * tensor=new ACLTensor(share);
+    tensor=new ACLTensor(share);
 #if 1    //F32
     tensor->allocator()->init(TensorInfo(shape, Format::F32));
 #else  //F16
     tensor->allocator()->init(TensorInfo(shape, Format::F16));
 #endif    
     tensor->bindmem(mem,share);
-    return tensor;
+    return true;
 }
 
 template <typename ACLTensor>
-void BaseTensor<ACLTensor>::commit(){
+void BaseTensor<ACLTensor>::commit(TensorType type){
+    settensortype(type);
     if (!share_&&mem_) {
         if (!allocate_){ 
 #ifdef USE_PROFILING
@@ -268,7 +272,18 @@ INSTANTIATE_ACLBASECLASS(CLFullyConnectedLayer,NEFullyConnectedLayer);
 INSTANTIATE_ACLBASECLASS(CLConvolutionLayer,NEConvolutionLayer); 
   INSTANTIATE_ACLBASE_FUNCTION(CLConvolutionLayer,NEConvolutionLayer,GPUTensor);
   INSTANTIATE_ACLBASE_FUNCTION(CLConvolutionLayer,NEConvolutionLayer,CPUTensor);
-
+INSTANTIATE_ACLBASECLASS(CLConvolutionLayer,NEDirectConvolutionLayer); 
+  INSTANTIATE_ACLBASE_FUNCTION(CLConvolutionLayer,NEDirectConvolutionLayer,GPUTensor);
+  INSTANTIATE_ACLBASE_FUNCTION(CLConvolutionLayer,NEDirectConvolutionLayer,CPUTensor);
+INSTANTIATE_ACLBASECLASS(CLBatchNormalizationLayer,NEBatchNormalizationLayer); 
+  INSTANTIATE_ACLBASE_FUNCTION(CLBatchNormalizationLayer,NEBatchNormalizationLayer,GPUTensor);
+  INSTANTIATE_ACLBASE_FUNCTION(CLBatchNormalizationLayer,NEBatchNormalizationLayer,CPUTensor);
+INSTANTIATE_ACLBASECLASS(CLLocallyConnectedLayer,NELocallyConnectedLayer); 
+  INSTANTIATE_ACLBASE_FUNCTION(CLLocallyConnectedLayer,NELocallyConnectedLayer,GPUTensor);
+  INSTANTIATE_ACLBASE_FUNCTION(CLLocallyConnectedLayer,NELocallyConnectedLayer,CPUTensor);
+INSTANTIATE_ACLBASECLASS(CLDepthConcatenate,NEDepthConcatenate); 
+  INSTANTIATE_ACLBASE_FUNCTION(CLDepthConcatenate,NEDepthConcatenate,GPUTensor);
+  INSTANTIATE_ACLBASE_FUNCTION(CLDepthConcatenate,NEDepthConcatenate,CPUTensor);
 }
 
 #endif

@@ -39,8 +39,8 @@ void ACLBaseActivationLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bo
     if (Caffe::arm_gpu_mode()) {
         Dtype *top_data = top[0]->mutable_gpu_data(); 
         const Dtype* bottom_data = bottom[0]->gpu_data();
-        this->gpu().input=new_tensor<GPUTensor>(input_shape,(void*)bottom_data);
-        this->gpu().output=new_tensor<GPUTensor>(output_shape,(void*)top_data);
+        new_tensor(this->gpu().input,input_shape,(void*)bottom_data);
+        new_tensor(this->gpu().output,output_shape,(void*)top_data);
 #ifdef USE_PROFILING
         logtime_util log_time(ACL_CONFIG_INFO);
 #endif //USE_PROFILING
@@ -48,8 +48,8 @@ void ACLBaseActivationLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bo
     }else{
         Dtype *top_data = top[0]->mutable_cpu_data(); 
         const Dtype* bottom_data = bottom[0]->cpu_data();
-        this->cpu().input=new_tensor<CPUTensor>(input_shape,(void*)bottom_data);
-        this->cpu().output=new_tensor<CPUTensor>(output_shape,(void*)top_data);
+        new_tensor(this->cpu().input,input_shape,(void*)bottom_data);
+        new_tensor(this->cpu().output,output_shape,(void*)top_data);
 #ifdef USE_PROFILING
         logtime_util log_time(ACL_CONFIG_INFO);
 #endif //USE_PROFILING

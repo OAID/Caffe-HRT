@@ -38,6 +38,9 @@
 #include "caffe/layers/acl_sigmoid_layer.hpp"
 #include "caffe/layers/acl_softmax_layer.hpp"
 #include "caffe/layers/acl_tanh_layer.hpp"
+#include "caffe/layers/acl_local_connect_layer.hpp"
+#include "caffe/layers/acl_batch_norm_layer.hpp"
+#include "caffe/layers/acl_concat_layer.hpp"
 #endif
 
 #ifdef WITH_PYTHON_LAYER
@@ -53,7 +56,7 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
   ConvolutionParameter conv_param = param.convolution_param();
   ConvolutionParameter_Engine engine = conv_param.engine();
 #ifdef USE_ACL
-  return shared_ptr<Layer<Dtype> >(new ACLConvolutionLayer<Dtype>(param));
+  return GetACLConvolutionLayer<Dtype>(param);
 #endif  
 #ifdef USE_CUDNN
   bool use_dilation = false;
@@ -302,6 +305,30 @@ shared_ptr<Layer<Dtype> > GetInnerProductLayer(const LayerParameter& param) {
 }
 
 REGISTER_LAYER_CREATOR(InnerProduct, GetInnerProductLayer);
+
+// Get BatchNorm layer according to engine.
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetBatchNormLayer(const LayerParameter& param) {
+  return shared_ptr<Layer<Dtype> >(new ACLBatchNormLayer<Dtype>(param));
+}
+
+REGISTER_LAYER_CREATOR(BatchNorm, GetBatchNormLayer);
+
+// Get LocalConnect layer according to engine.
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetLocalConnectLayer(const LayerParameter& param) {
+  return shared_ptr<Layer<Dtype> >(new ACLLocalConnectLayer<Dtype>(param));
+}
+
+REGISTER_LAYER_CREATOR(LocalConnect, GetLocalConnectLayer);
+
+// Get Concat layer according to engine.
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetConcatLayer(const LayerParameter& param) {
+  return shared_ptr<Layer<Dtype> >(new ACLConcatLayer<Dtype>(param));
+}
+
+REGISTER_LAYER_CREATOR(Concat, GetConcatLayer);
 
 #endif // USE_ACL
 

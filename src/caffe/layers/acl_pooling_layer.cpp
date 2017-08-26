@@ -37,8 +37,8 @@ void ACLPoolingLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
     if (Caffe::arm_gpu_mode()) {
         Dtype *top_data = top[0]->mutable_gpu_data(); 
         const Dtype* bottom_data = bottom[0]->gpu_data();
-        this->gpu().input=new_tensor<GPUTensor>(in_shape,(void*)bottom_data);
-        this->gpu().output=new_tensor<GPUTensor>(out_shape,(void*)top_data);
+        new_tensor(this->gpu().input,in_shape,(void*)bottom_data);
+        new_tensor(this->gpu().output,out_shape,(void*)top_data);
 #ifdef USE_PROFILING
         logtime_util log_time(ACL_CONFIG_INFO);
 #endif //USE_PROFILING
@@ -46,8 +46,8 @@ void ACLPoolingLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
     }else{
         Dtype *top_data = top[0]->mutable_cpu_data(); 
         const Dtype* bottom_data = bottom[0]->cpu_data();
-        this->cpu().input=new_tensor<CPUTensor>(in_shape,(void*)bottom_data);
-        this->cpu().output=new_tensor<CPUTensor>(out_shape,(void*)top_data);
+        new_tensor(this->cpu().input,in_shape,(void*)bottom_data);
+        new_tensor(this->cpu().output,out_shape,(void*)top_data);
 #ifdef USE_PROFILING
         logtime_util log_time(ACL_CONFIG_INFO);
 #endif //USE_PROFILING
@@ -72,7 +72,7 @@ void ACLPoolingLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 #ifdef USE_PROFILING
   logtime_util log_time(ACL_POOLING_INFO);
 #endif //USE_PROFILING
-  if (this->force_bypass_acl_path_) {
+  if (this->force_bypass_acl_path_|| this->layer_param_.pooling_param().global_pooling()) {
       PoolingLayer<Dtype>::Forward_cpu(bottom,top);
       return;
   }
@@ -109,7 +109,7 @@ void ACLPoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 #ifdef USE_PROFILING
   logtime_util log_time(ACL_POOLING_INFO);
 #endif //USE_PROFILING
-  if (this->force_bypass_acl_path_) {
+  if (this->force_bypass_acl_path_|| this->layer_param_.pooling_param().global_pooling()) {
       PoolingLayer<Dtype>::Forward_cpu(bottom,top);
       return;
   }
