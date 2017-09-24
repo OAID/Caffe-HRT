@@ -1,4 +1,4 @@
- # 1. Release Note
+# 1. Release Note
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
 CaffeOnACL is a project that is maintained by **OPEN** AI LAB, it uses Arm Compute Library (NEON+GPU) to speed up [Caffe](http://caffe.berkeleyvision.org/) and provide utilities to debug, profile and tune application performance. 
@@ -12,17 +12,11 @@ The release version is 0.3.0, is based on Rockchip RK3399 Platform, target OS is
 - Hardware platform : Rockchip RK3399. See also [RK3399 SoC](http://www.rock-chips.com/plus/3399.html)
 - Software platform : Ubuntu 16.04
 
-## 1.2 Installation (Quick User Guide)
-Please refer to [Installation](installation.md) for details
+* Installation Guide : Refer to [Installation](installation.md)
+* User Manual        : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/user_manual.pdf)
+* Performance Report : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/performance_report.pdf)
 
-## 1.3 User Manual
-Please refer to [Performance Report](performance_report.pdf) for details
-
-## 1.4 Performance Report
-Please refer to [Performance Report](performance_report.pdf) for details
-
-
-## 1.5 Arm Compute Library Compatibility Issues :
+## 1.2 Arm Compute Library Compatibility Issues :
 There are some compatibility issues between ACL and Caffe Layers, we bypass it to Caffe's original layer class as the workaround solution for the below issues
 
 * Normalization in-channel issue
