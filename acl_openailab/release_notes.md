@@ -2,17 +2,17 @@
 # Release Note
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
-CaffeOnACL is a project to use ARM Compute Library (NEON+GPU) to speed up caffe and provide utilities to debug, profile and tune application performance.
-
-      The Arm Compute Library is a collection of low-level software functions optimized for Arm Cortex CPU and Arm Mali GPU architectures, targeted at a variety of use-cases including: image processing, computer vision and machine learning.
+CaffeOnACL is a project to use Arm Compute Library (NEON+GPU) to speed up caffe and provide utilities to debug, profile and tune application performance.
 
 The release version is 0.3.0. You can download the source code from [OAID/CaffeOnACL](https://github.com/OAID/CaffeOnACL)
 
+* The ARM Computer Vision and Machine Learning library is a set of functions optimised for both ARM CPUs and GPUs using SIMD technologies. See also [Arm Compute Library](https://github.com/ARM-software/ComputeLibrary)
+
 ## Verified Platform :
 
-The release is verified on 64bits ARMv8 processor
+The release is verified on ARMv8 processor
 
-- Hardware platform : Rockchip RK3399 ([Firefly-RK3399 board](http://wiki.t-firefly.com/index.php/Firefly-RK3399))
+- Hardware platform : Rockchip RK3399 ([RK3399 SoC](http://www.rock-chips.com/plus/3399.html)
 - Software platform : Ubuntu 16.04<br>
 
 ## ACL Compatibility Issues :
