@@ -13,7 +13,7 @@ The release version is 0.3.0, is based on Rockchip RK3399 Platform, target OS is
 - Software platform : Ubuntu 16.04
 
 - Installation Guide : Refer to [Installation](installation.md)
-- User Manual        : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/user_manual.pdf)
+- User Manual        : Refer to [User Manual](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/user_manual.pdf)
 - Performance Report : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/performance_report.pdf)
 
 ## 1.2 Arm Compute Library Compatibility Issues :
