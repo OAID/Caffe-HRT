@@ -1,5 +1,5 @@
 # Release Note
-[![Build](https://img.shields.io/teamcity/codebetter/bt428.svg)](build) [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
 The release version is 0.3.0. You can download the source code from [OAID/CaffeOnACL](https://github.com/OAID/CaffeOnACL)
 
