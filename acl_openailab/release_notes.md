@@ -2,7 +2,7 @@
 # Release Note
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
-CaffeOnACL is a project that is maintained by **OPEN AI LAB**, it uses Arm Compute Library (NEON+GPU) to speed up [Caffe](http://caffe.berkeleyvision.org/) and provide utilities to debug, profile and tune application performance. 
+CaffeOnACL is a project that is maintained by **OPEN** AI LAB, it uses Arm Compute Library (NEON+GPU) to speed up [Caffe](http://caffe.berkeleyvision.org/) and provide utilities to debug, profile and tune application performance. 
 
 The release version is 0.3.0, is based on Rockchip RK3399 Platform, target OS is Ubuntu 16.04. Can download the source code from [OAID/CaffeOnACL](https://github.com/OAID/CaffeOnACL)
 
