@@ -8,13 +8,13 @@ The release version is 0.3.0, is based on Rockchip RK3399 Platform, target OS is
 * The ARM Computer Vision and Machine Learning library is a set of functions optimised for both ARM CPUs and GPUs using SIMD technologies. See also [Arm Compute Library](https://github.com/ARM-software/ComputeLibrary).
 * Caffe is a fast open framework for deep learning. See also [Caffe](https://github.com/BVLC/caffe).
 
-## 1.1 Verified Platform :
+## 1.1 CaffeOnACL  :
 - Hardware platform : Rockchip RK3399. See also [RK3399 SoC](http://www.rock-chips.com/plus/3399.html)
 - Software platform : Ubuntu 16.04
 
-* Installation Guide : Refer to [Installation](installation.md)
-* User Manual        : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/user_manual.pdf)
-* Performance Report : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/performance_report.pdf)
+- Installation Guide : Refer to [Installation](installation.md)
+- User Manual        : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/user_manual.pdf)
+- Performance Report : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/performance_report.pdf)
 
 ## 1.2 Arm Compute Library Compatibility Issues :
 There are some compatibility issues between ACL and Caffe Layers, we bypass it to Caffe's original layer class as the workaround solution for the below issues
