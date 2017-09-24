@@ -1,13 +1,3 @@
-# CaffeOnACL
-[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
-
-CaffeOnACL is a project to use ARM Compute Library (NEON+GPU) to speed up caffe and provide utilities to debug, profile and tune application performance.
-
-Check out the documents for the details like
-- [release notes](https://github.com/OAID/caffeOnACL/tree/master/acl_openailab/README.md)
-
-
-
 # Caffe
 
 [![Build Status](https://travis-ci.org/BVLC/caffe.svg?branch=master)](https://travis-ci.org/BVLC/caffe)
