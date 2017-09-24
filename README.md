@@ -57,7 +57,7 @@ Fix the issues:
 * BNLL Layer
 * InnerProduct Layer
 
-# 3 Issue Report
+# Issue Report
 Encounter any issue, please report on [issue report](https://github.com/OAID/CaffeOnACL/issues). Issue report should contain the following information :
 
 *  The exact description of the steps that are needed to reproduce the issue 
