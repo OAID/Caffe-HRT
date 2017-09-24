@@ -1,5 +1,10 @@
+
 # Release Note
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
+
+CaffeOnACL is a project to use ARM Compute Library (NEON+GPU) to speed up caffe and provide utilities to debug, profile and tune application performance.
+
+      The Arm Compute Library is a collection of low-level software functions optimized for Arm Cortex CPU and Arm Mali GPU architectures, targeted at a variety of use-cases including: image processing, computer vision and machine learning.
 
 The release version is 0.3.0. You can download the source code from [OAID/CaffeOnACL](https://github.com/OAID/CaffeOnACL)
 
