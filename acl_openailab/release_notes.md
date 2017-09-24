@@ -1,4 +1,4 @@
-
+)
 # Release Note
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
@@ -7,15 +7,16 @@ CaffeOnACL is a project to use Arm Compute Library (NEON+GPU) to speed up caffe 
 The release version is 0.3.0. You can download the source code from [OAID/CaffeOnACL](https://github.com/OAID/CaffeOnACL)
 
 * The ARM Computer Vision and Machine Learning library is a set of functions optimised for both ARM CPUs and GPUs using SIMD technologies. See also [Arm Compute Library](https://github.com/ARM-software/ComputeLibrary)
+* Caffe is a fast open framework for deep learning ([Caffe](https://github.com/BVLC/caffe))
 
 ## Verified Platform :
 
 The release is verified on ARMv8 processor
 
-- Hardware platform : Rockchip RK3399 ([RK3399 SoC](http://www.rock-chips.com/plus/3399.html)
+- Hardware platform : Rockchip RK3399 ([RK3399 SoC](http://www.rock-chips.com/plus/3399.html))
 - Software platform : Ubuntu 16.04<br>
 
-## ACL Compatibility Issues :
+## Arm Compute Library Compatibility Issues :
 There are some compatibility issues between ACL and Caffe Layers, we bypass it to Caffe's original layer class as the workaround solution for the below issues
 
 * Normalization in-channel issue
