@@ -12,8 +12,8 @@ The release version is 0.3.0, is based on Rockchip RK3399 Platform, target OS is
 The release is validated on [Rockchip RK3399](http://www.rock-chips.com/plus/3399.html), Operation system is Ubuntu 16.04.
 
 * [Installation instructions](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/installation.md)
-* User Manual        : Refer to [User Manual](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/user_manual.pdf)
-* Performance Report : Refer to [Performance Report](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/performance_report.pdf)
+* [User Manuals PDF](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/user_manual.pdf)
+* [Performance Report PDF](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/performance_report.pdf)
 
 ## 1.2 Arm Compute Library Compatibility Issues :
 There are some compatibility issues between ACL and Caffe Layers, we bypass it to Caffe's original layer class as the workaround solution for the below issues
