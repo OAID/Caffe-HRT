@@ -1,4 +1,5 @@
 
+
 # Release Note
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
@@ -14,7 +15,10 @@ The release version is 0.3.0, is based on Rockchip RK3399 Platform, target OS is
 Verified on ARMv8 processor.
 
 - Hardware platform : Rockchip RK3399. See also [RK3399 SoC](http://www.rock-chips.com/plus/3399.html)
-- Software platform : Ubuntu 16.04<br>
+- Software platform : Ubuntu 16.04
+
+## Installation
+Please refer to [Installation](installation.md) for details
 
 ## Arm Compute Library Compatibility Issues :
 There are some compatibility issues between ACL and Caffe Layers, we bypass it to Caffe's original layer class as the workaround solution for the below issues
