@@ -54,7 +54,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 
 ## 3.4 To Configure The Libraries
 
-	sudo cp ~/ComputeLibrary/build/libArm_compute.so /usr/lib 
+	sudo cp ~/ComputeLibrary/build/libarm_compute.so /usr/lib 
 	sudo cp ~/CaffeOnACL/distribute/lib/libcaffe.so  /usr/lib
 
 # 4. Run tests
