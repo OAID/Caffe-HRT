@@ -9,7 +9,8 @@ template <typename Dtype>
 void ACLConcatLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   ConcatLayer<Dtype>::LayerSetUp(bottom, top);
-  this->force_bypass_acl_path_= bypass_acl_class_layer & FLAGS_ENABLE_ACL_CONCAT;
+  //this->force_bypass_acl_path_= bypass_acl_class_layer & FLAGS_ENABLE_ACL_CONCAT;
+  this->force_bypass_acl_path_= true;
 }
 template <typename Dtype>
 void ACLConcatLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
