@@ -116,7 +116,7 @@ int BaseTensor<ACLTensor>::tensor_copy(void * mem,bool toTensor)
 #endif //USE_PROFILING
     arm_compute::Window window;
     ACLTensor* tensor=this;
-    window.use_tensor_dimensions(tensor->info(), /* first_dimension =*/Window::DimY); // Iterate through the rows (not each element)
+    window.use_tensor_dimensions(tensor->info()->tensor_shape(), /* first_dimension =*/Window::DimY); // Iterate through the rows (not each element)
     int width = tensor->info()->tensor_shape()[0]; //->dimension(0); //window.x().end() - window.x().start(); // + 1;
     int height = tensor->info()->tensor_shape()[1]; //->dimension(1); //window.y().end() - window.y().start(); // + 1;
     int deepth = tensor->info()->tensor_shape()[2];

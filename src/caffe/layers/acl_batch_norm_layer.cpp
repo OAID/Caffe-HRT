@@ -115,13 +115,13 @@ void ACLBatchNormLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       Forward_gpu(bottom, top);
       return;
   }         
+#ifdef USE_PROFILING
+  logtime_util log_time(ACL_BN_INFO);
+#endif //USE_PROFILING
   if (this->force_bypass_acl_path_||!this->use_global_stats_) {
         BatchNormLayer<Dtype>::Forward_cpu(bottom,top);
         return;
   }
-#ifdef USE_PROFILING
-  logtime_util log_time(ACL_BN_INFO);
-#endif //USE_PROFILING
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = top[0]->mutable_cpu_data();
   SetupACLLayer(bottom,top);

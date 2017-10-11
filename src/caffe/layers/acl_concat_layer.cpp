@@ -113,6 +113,7 @@ void ACLConcatLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 template <typename Dtype>
 ACLConcatLayer<Dtype>::~ACLConcatLayer() {
+    if(this->force_bypass_acl_path_)return;
     for (int i =0; i < cpu_vectors.size(); i ++) {
         delete cpu_vectors[i];
     }
