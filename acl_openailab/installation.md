@@ -20,7 +20,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 
 	cd ~
 
-#### Download "ACL" (arm_compute : [v17.06](https://github.com/ARM-software/ComputeLibrary/tree/dbdab85d6e0f96d3361a9e30310367d89953466c)):
+#### Download "ACL" (arm_compute :[v17.09](https://github.com/ARM-software/ComputeLibrary/tree/8938bd3f40ea62ff56d6ed4e2db0a8aee34dd64a)):
 	git clone https://github.com/ARM-software/ComputeLibrary.git
 #### Download "CaffeOnACL" :
 	git clone https://github.com/OAID/CaffeOnACL.git
