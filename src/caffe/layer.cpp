@@ -20,7 +20,7 @@ unsigned long get_cur_time(void)
 {
    struct timespec tm;
 
-   clock_gettime(CLOCK_MONOTONIC_COARSE, &tm);
+   clock_gettime(CLOCK_MONOTONIC, &tm);
 
    return (tm.tv_sec*1000000+tm.tv_nsec/1000);
 }

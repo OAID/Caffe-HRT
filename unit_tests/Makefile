@@ -16,7 +16,7 @@ HOME=/home/firefly
 #  caffe related stuff
 #
 
-CAFFE_ROOT=$(HOME)/caffeOnACL
+CAFFE_ROOT=$(HOME)/CaffeOnACL
 CAFFE_INCS = -I$(CAFFE_ROOT)/include -I$(CAFFE_ROOT)/distribute/include/
 CAFFE_LIBS = -L$(CAFFE_ROOT)/distribute/lib -lcaffe  -lglog -lgflags -lprotobuf -lboost_system -lboost_filesystem
 CAFFE_RPATH =$(CAFFE_ROOT)/distribute/lib

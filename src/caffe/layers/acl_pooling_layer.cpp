@@ -15,8 +15,8 @@ template <typename Dtype>
 void ACLPoolingLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top){
 
-    TensorShape in_shape ((unsigned int)this->width_, (unsigned int)this->height_);
-    TensorShape out_shape((unsigned int)this->pooled_width_, (unsigned int)this->pooled_height_);
+    TensorShape in_shape ((unsigned int)this->width_, (unsigned int)this->height_,(unsigned int)this->channels_);
+    TensorShape out_shape((unsigned int)this->pooled_width_, (unsigned int)this->pooled_height_,(unsigned int)this->channels_);
     checkreshape(in_shape,Caffe::arm_gpu_mode());
     if (!this->init_layer_) return;
     this->init_layer_=false;
@@ -93,13 +93,11 @@ void ACLPoolingLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   }
   SetupACLLayer(bottom,top);
   for (int n = 0; n < bottom[0]->num(); ++n) {
-    for (int c = 0; c < this->channels_; ++c) {
         tensor_mem(this->cpu().input,(void*)(bottom_data));
         cpu_run();
         tensor_mem((void*)(top_data),this->cpu().output);
-        bottom_data += bottom[0]->offset(0, 1);
-        top_data += top[0]->offset(0, 1);
-    }
+        bottom_data += bottom[0]->offset(1);
+        top_data += top[0]->offset(1);
   }
 }
 
@@ -130,13 +128,11 @@ void ACLPoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   }
   SetupACLLayer(bottom,top);
   for (int n = 0; n < bottom[0]->num(); ++n) {
-    for (int c = 0; c < this->channels_; ++c) {
         tensor_mem(this->gpu().input,(void*)(bottom_data));
         gpu_run();
         tensor_mem((void*)(top_data),this->gpu().output);
-        bottom_data += bottom[0]->offset(0, 1);
-        top_data += top[0]->offset(0, 1);
-    }
+        bottom_data += bottom[0]->offset(1);
+        top_data += top[0]->offset(1);
   }
 }
 

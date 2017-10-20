@@ -15,7 +15,7 @@ ACL_INCS :=$(ACL_ROOT)/include
 ACL_INCS +=$(ACL_ROOT)
 ACL_LIBS_DIR :=$(ACL_ROOT)/build
 ACL_LIBS_DIR +=$(ACL_ROOT)/build/arm_compute
-ACL_LIBS :=arm_compute OpenCL
+ACL_LIBS :=arm_compute arm_compute_core OpenCL
 
 # uncomment to disable IO dependencies and corresponding data layers
 # USE_OPENCV := 0
