@@ -20,8 +20,9 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 
 	cd ~
 
-#### Download "ACL" (arm_compute :[v17.09](https://github.com/ARM-software/ComputeLibrary/tree/8938bd3f40ea62ff56d6ed4e2db0a8aee34dd64a)):
+#### Download "ACL" (arm_compute :[v17.10](https://github.com/ARM-software/ComputeLibrary/tree/bf8b01dfbfdca124673ade33c5eac8f3748d7abd)):
 	git clone https://github.com/ARM-software/ComputeLibrary.git
+	git checkout bf8b01d
 #### Download "CaffeOnACL" :
 	git clone https://github.com/OAID/CaffeOnACL.git
 #### Download "Googletest" :
@@ -55,6 +56,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 ## 3.4 To Configure The Libraries
 
 	sudo cp ~/ComputeLibrary/build/libarm_compute.so /usr/lib 
+	sudo cp ~/ComputeLibrary/build/libarm_compute_core.so /usr/lib 
 	sudo cp ~/CaffeOnACL/distribute/lib/libcaffe.so  /usr/lib
 
 # 4. Run tests
