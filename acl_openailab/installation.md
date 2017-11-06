@@ -6,7 +6,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 # 2. Preparation
 ## 2.1 General dependencies installation
 	sudo apt-get -y update
-	sodo apt-get -y upgrade
+	sudo apt-get -y upgrade
 	sudo apt-get install -y build-essential pkg-config automake autoconf protobuf-compiler cmake cmake-gui
 	sudo apt-get install -y libprotobuf-dev libleveldb-dev libsnappy-dev libhdf5-serial-dev
 	sudo apt-get install -y libatlas-base-dev libgflags-dev libgoogle-glog-dev liblmdb-dev libopenblas-dev
