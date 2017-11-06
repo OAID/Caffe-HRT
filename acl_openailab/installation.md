@@ -5,59 +5,67 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 
 # 2. Preparation
 ## 2.1 General dependencies installation
-	sudo apt-get -y update
-	sodo apt-get -y upgrade
-	sudo apt-get install -y build-essential pkg-config automake autoconf protobuf-compiler cmake cmake-gui
-	sudo apt-get install -y libprotobuf-dev libleveldb-dev libsnappy-dev libhdf5-serial-dev
-	sudo apt-get install -y libatlas-base-dev libgflags-dev libgoogle-glog-dev liblmdb-dev libopenblas-dev
-	sudo apt-get install -y libopencv-dev python-dev
-	sudo apt-get install -y python-numpy python-scipy python-yaml python-six python-pip
-	sudo apt-get install -y scons git
-	sudo apt-get install -y --no-install-recommends libboost-all-dev
-	pip install --upgrade pip
+	sudo apt-get install git cmake scons protobuf-compiler libgflags-dev libgoogle-glog-dev 
+	sudo apt-get install libblas-dev libhdf5-serial-dev liblmdb-dev libleveldb-dev 
+	sudo apt-get install liblapack-dev libsnappy-dev python-numpy 
+	sudo apt-get install libprotobuf-dev libopenblas-dev libgtk2.0-dev
+	sudo apt-get install python-yaml python-numpy python-scipy python-six
+	
+	sudo apt-get install --no-install-recommends libboost-all-dev
 
 ## 2.2 Download source code
 
 	cd ~
-
-#### Download "ACL" (arm_compute :[v17.10](https://github.com/ARM-software/ComputeLibrary/tree/bf8b01dfbfdca124673ade33c5eac8f3748d7abd)):
+	
+#### Download "OpenCV" 
+	wget --no-check-certificate https://github.com/opencv/opencv/archive/3.3.0.tar.gz
+	tar -xvf 3.3.0.tar.gz
+#### Download "gen-pkg-config-pc" 
+	wget https://github.com/OAID/AID-tools/tree/master/script/gen-pkg-config-pc.sh
+#### Download "ACL" 
 	git clone https://github.com/ARM-software/ComputeLibrary.git
-	git checkout bf8b01d
 #### Download "CaffeOnACL" :
 	git clone https://github.com/OAID/CaffeOnACL.git
 #### Download "Googletest" :
 	git clone https://github.com/google/googletest.git
 
 # 3. Build CaffeOnACL
-## 3.1 Build ACL :
+
+## 3.1 Build OpenCV :
+	cd ~/opencv-3.3.0
+	mkdir build
+	cd build
+	cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local/AID/opencv3.3.0 ..
+	sudo make install
+	sudo ~/gen-pkg-config-pc.sh /usr/local/AID
+	
+## 3.2 Build ACL :
 	cd ~/ComputeLibrary
     aarch64-linux-gnu-gcc opencl-1.2-stubs/opencl_stubs.c -Iinclude -shared -o build/libOpenCL.so
-	scons Werror=1 -j8 debug=0 asserts=1 neon=1 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
+	scons Werror=1 -j4 debug=0 asserts=1 neon=1 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
+	wget https://github.com/OAID/AID-tools/tree/master/script/Computelibrary/Makefile
+	sudo make install
 
-## 3.2 Build Caffe :
-	export ACL_ROOT=~/ComputeLibrary
+## 3.3 Build Caffe :
 	cd ~/CaffeOnACL
-	cp Makefile.config.acl Makefile.config
-	make all distribute
+	make all 
+	make distribute
+	sudo make install
 
-## 3.3 Build Unit tests
+## 3.4 Build Unit tests
 ##### Build the gtest libraries
 	cd ~/googletest
-	cmake CMakeLists.txt
+	cmake -D CMAKE_INSTALL_PREFIX=/usr/local/AID/googletest CMakeLists.txt
 	make
 	sudo make install
 
 ##### Build Caffe Unit tests
-	export CAFFE_ROOT=~/CaffeOnACL
 	cd ~/CaffeOnACL/unit_tests
 	make clean
 	make
 
-## 3.4 To Configure The Libraries
-
-	sudo cp ~/ComputeLibrary/build/libarm_compute.so /usr/lib 
-	sudo cp ~/ComputeLibrary/build/libarm_compute_core.so /usr/lib 
-	sudo cp ~/CaffeOnACL/distribute/lib/libcaffe.so  /usr/lib
+## 3.5 To Configure The Libraries
+	sudo ~/gen-pkg-config-pc.sh /usr/local/AID
 
 # 4. Run tests
 
