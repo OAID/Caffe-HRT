@@ -10,12 +10,13 @@ CPU_ONLY := 1
 USE_PROFILING := 0
 
 USE_ACL :=1
-ACL_ROOT :=/home/firefly/ComputeLibrary
+ACL_ROOT :=$(AIDDIR)/ComputeLibrary
 ACL_INCS :=$(ACL_ROOT)/include 
 ACL_INCS +=$(ACL_ROOT)
-ACL_LIBS_DIR :=$(ACL_ROOT)/build
-ACL_LIBS_DIR +=$(ACL_ROOT)/build/arm_compute
+ACL_LIBS_DIR :=$(ACL_ROOT)/lib
+ACL_LIBS_DIR +=$(ACL_ROOT)/arm_compute
 ACL_LIBS :=arm_compute arm_compute_core OpenCL
+
 
 # uncomment to disable IO dependencies and corresponding data layers
 # USE_OPENCV := 0
@@ -28,7 +29,7 @@ ACL_LIBS :=arm_compute arm_compute_core OpenCL
 # ALLOW_LMDB_NOLOCK := 1
 
 # Uncomment if you're using OpenCV 3
-# OPENCV_VERSION := 3
+OPENCV_VERSION := 3
 
 # To customize your choice of compiler, uncomment and set the following.
 # N.B. the default for Linux is g++ and the default for OSX is clang++
@@ -38,7 +39,7 @@ ACL_LIBS :=arm_compute arm_compute_core OpenCL
 #arch :=arm64-v8a
 
 # CUDA directory contains bin/ and lib/ directories that we need.
-CUDA_DIR := /usr/local/cuda
+CUDA_DIR := ${AIDDIR}/cuda
 # On Ubuntu 14.04, if cuda tools are installed via
 # "sudo apt-get install nvidia-cuda-toolkit" then use this instead:
 # CUDA_DIR := /usr
@@ -118,7 +119,8 @@ LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib
 
 # Uncomment to use `pkg-config` to specify OpenCV library paths.
 # (Usually not necessary -- OpenCV libraries are normally installed in one of the above $LIBRARY_DIRS.)
-# USE_PKG_CONFIG := 1
+USE_PKG_CONFIG := 1
+
 
 # N.B. both build and distribute dirs are cleared on `make clean`
 BUILD_DIR := build

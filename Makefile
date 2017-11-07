@@ -1,6 +1,9 @@
 PROJECT := caffe
 
-CONFIG_FILE := Makefile.config
+AIDDIR=/usr/local/AID
+export PKG_CONFIG_PATH=${AIDDIR}/opencv3.3.0/lib/pkgconfig
+
+CONFIG_FILE := Makefile.config.acl
 # Explicitly check for the config file, otherwise make -k will proceed anyway.
 ifeq ($(wildcard $(CONFIG_FILE)),)
 $(error $(CONFIG_FILE) not found. See $(CONFIG_FILE).example.)
@@ -450,20 +453,24 @@ LIBRARY_DIRS += $(LIB_BUILD_DIR)
 # Automatic dependency generation (nvcc is handled separately)
 CXXFLAGS += -MMD -MP
 
+USE_PKG_CONFIG ?= 0
+ifeq ($(USE_PKG_CONFIG), 1)
+	PKG_INCLUDE_DIRS :=  `pkg-config opencv --cflags`
+        PKG_CONFIG := `pkg-config opencv --libs`
+else
+        PKG_CONFIG :=
+	PKG_INCLUDE_DIRS :=
+endif
+
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
+COMMON_FLAGS += $(PKG_INCLUDE_DIRS)
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 NVCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS)
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 
-USE_PKG_CONFIG ?= 0
-ifeq ($(USE_PKG_CONFIG), 1)
-	PKG_CONFIG := $(shell pkg-config opencv --libs)
-else
-	PKG_CONFIG :=
-endif
 LDFLAGS += $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir)) $(PKG_CONFIG) \
 		$(foreach library,$(LIBRARIES),-l$(library))
 PYTHON_LDFLAGS := $(LDFLAGS) $(foreach library,$(PYTHON_LIBRARIES),-l$(library))
@@ -491,9 +498,14 @@ endif
 ##############################
 .PHONY: all lib test clean docs linecount lint lintclean tools examples $(DIST_ALIASES) \
 	py mat py$(PROJECT) mat$(PROJECT) proto runtest \
-	superclean supercleanlist supercleanfiles warn everything
+	superclean supercleanlist supercleanfiles warn everything install
 
 all: lib tools examples
+
+install:
+	install -d $(AIDDIR)/CaffeOnACL
+	cp -rfp ./distribute/* $(AIDDIR)/CaffeOnACL
+	chown -R root:root $(AIDDIR)/CaffeOnACL
 
 lib: $(STATIC_NAME) $(DYNAMIC_NAME)
 
