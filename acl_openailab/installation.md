@@ -21,7 +21,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	wget --no-check-certificate https://github.com/opencv/opencv/archive/3.3.0.tar.gz
 	tar -xvf 3.3.0.tar.gz
 #### Download "gen-pkg-config-pc" 
-	wget https://github.com/OAID/AID-tools/tree/master/script/gen-pkg-config-pc.sh
+	wget https://raw.githubusercontent.com/OAID/AID-tools/master/script/gen-pkg-config-pc.sh
 #### Download "ACL" 
 	git clone https://github.com/ARM-software/ComputeLibrary.git
 #### Download "CaffeOnACL" :
@@ -43,7 +43,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	cd ~/ComputeLibrary
     aarch64-linux-gnu-gcc opencl-1.2-stubs/opencl_stubs.c -Iinclude -shared -o build/libOpenCL.so
 	scons Werror=1 -j4 debug=0 asserts=1 neon=1 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
-	wget https://github.com/OAID/AID-tools/tree/master/script/Computelibrary/Makefile
+	wget https://raw.githubusercontent.com/OAID/AID-tools/master/script/Computelibrary/Makefile
 	sudo make install
 
 ## 3.3 Build Caffe :
