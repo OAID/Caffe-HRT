@@ -1,8 +1,5 @@
 PROJECT := caffe
 
-AIDDIR=/usr/local/AID
-export PKG_CONFIG_PATH=${AIDDIR}/opencv3.3.0/lib/pkgconfig
-
 CONFIG_FILE := Makefile.config.acl
 # Explicitly check for the config file, otherwise make -k will proceed anyway.
 ifeq ($(wildcard $(CONFIG_FILE)),)

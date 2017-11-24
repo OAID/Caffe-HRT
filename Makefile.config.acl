@@ -1,6 +1,9 @@
 ## Refer to http://caffe.berkeleyvision.org/installation.html
 # Contributions simplifying and improving our build system are welcome!
 
+AIDDIR=/usr/local/AID
+export PKG_CONFIG_PATH=${AIDDIR}/opencv3.3.0/lib/pkgconfig
+
 # cuDNN acceleration switch (uncomment to build with cuDNN).
 # USE_CUDNN := 1
 
