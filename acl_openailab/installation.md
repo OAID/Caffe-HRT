@@ -41,6 +41,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	
 ## 3.2 Build ACL :
 	cd ~/ComputeLibrary
+	mkdir build
     aarch64-linux-gnu-gcc opencl-1.2-stubs/opencl_stubs.c -Iinclude -shared -o build/libOpenCL.so
 	scons Werror=1 -j4 debug=0 asserts=1 neon=1 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
 	wget https://github.com/OAID/AID-tools/raw/master/script/Computelibrary/Makefile
