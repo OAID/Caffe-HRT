@@ -24,6 +24,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	wget https://github.com/OAID/AID-tools/raw/master/script/gen-pkg-config-pc.sh
 #### Download "ACL" 
 	git clone https://github.com/ARM-software/ComputeLibrary.git
+	git checkout bf8b01d
 #### Download "CaffeOnACL" :
 	git clone https://github.com/OAID/CaffeOnACL.git
 #### Download "Googletest" :
