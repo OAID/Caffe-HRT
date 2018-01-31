@@ -4,7 +4,7 @@
 
 CaffeOnACL is a project that is maintained by **OPEN** AI LAB, it uses Arm Compute Library (NEON+GPU) to speed up [Caffe](http://caffe.berkeleyvision.org/) and provide utilities to debug, profile and tune application performance. 
 
-The release version is 0.4.0, is based on [Rockchip RK3399](http://www.rock-chips.com/plus/3399.html) Platform, target OS is Ubuntu 16.04. Can download the source code from [OAID/CaffeOnACL](https://github.com/OAID/CaffeOnACL)
+The release version is 0.5.0, is based on [Rockchip RK3399](http://www.rock-chips.com/plus/3399.html) Platform, target OS is Ubuntu 16.04. Can download the source code from [OAID/CaffeOnACL](https://github.com/OAID/CaffeOnACL)
 
 * The ARM Computer Vision and Machine Learning library is a set of functions optimised for both ARM CPUs and GPUs using SIMD technologies. See also [Arm Compute Library](https://github.com/ARM-software/ComputeLibrary).
 * Caffe is a fast open framework for deep learning. See also [Caffe](https://github.com/BVLC/caffe).
@@ -28,18 +28,21 @@ Performance need be fine turned in the future
 # Release History
 The Caffe based version is [793bd96351749cb8df16f1581baf3e7d8036ac37](https://github.com/BVLC/caffe/tree/793bd96351749cb8df16f1581baf3e7d8036ac37).
 
+### Version 0.5.0 - Jan 31, 2018
+Support Arm Compute Library version 17.12
+
+### Version 0.4.1 - Nov 23, 2017
+Support Arm Compute Library version 17.10
 
 ### Version 0.4.0 - Oct 11, 2017
 Support Arm Compute Library version 17.09
 
 ### Version 0.3.0 - Aug 26, 2017
 Support Arm Compute Library version 17.06 with 4 new layers added
-
 * Batch Normalization Layer
 * Direct convolution Layer
 * Locally Connect Layer
 * Concatenate layer
-
 
 ### Version 0.2.0 - Jul 2, 2017
 
