@@ -15,9 +15,9 @@ void ACLAbsValLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-void ACLAbsValLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top,ActivationLayerInfo::ActivationFunction type){
-    ACLBaseActivationLayer<Dtype>::SetupACLLayer(bottom, top,ActivationLayerInfo::ActivationFunction::ABS);
+void ACLAbsValLayer<Dtype>::SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top,arm_compute::ActivationLayerInfo::ActivationFunction type){
+    ACLBaseActivationLayer<Dtype>::SetupACLOperator(bottom, top,arm_compute::ActivationLayerInfo::ActivationFunction::ABS);
 }
 
 template <typename Dtype>
@@ -28,12 +28,21 @@ void ACLAbsValLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
+bool ACLAbsValLayer<Dtype>::Bypass_acl(const vector<Blob<Dtype>*>& bottom,const vector<Blob<Dtype>*>& top){
+    bool bypass_acl=false;
+    if (this->force_bypass_acl_path_) {
+        bypass_acl=true;
+    }
+    return bypass_acl;
+}
+
+template <typename Dtype>
 void ACLAbsValLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
 #ifdef USE_PROFILING
     logtime_util log_time(ACL_ABSVAL_INFO);
 #endif //USE_PROFILING
-    if (this->force_bypass_acl_path_) {
+    if (Bypass_acl(bottom,top)) {
         AbsValLayer<Dtype>::Forward_cpu(bottom,top);
         return;
     }
@@ -46,7 +55,7 @@ void ACLAbsValLayer<Dtype>::Forward_gpu(
 #ifdef USE_PROFILING
     logtime_util log_time(ACL_ABSVAL_INFO);
 #endif //USE_PROFILING
-    if (this->force_bypass_acl_path_) {
+    if (Bypass_acl(bottom,top)) {
         AbsValLayer<Dtype>::Forward_cpu(bottom,top);
         return;
     }

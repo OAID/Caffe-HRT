@@ -15,20 +15,14 @@ void ACLLocalConnectLayer<Dtype>::LayerSetUp(
 }
 
 template <typename Dtype>
-void ACLLocalConnectLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
+void ACLLocalConnectLayer<Dtype>::SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top){
 
-    TensorShape input_shape((unsigned int)bottom[0]->width(), (unsigned int)bottom[0]->height(),(unsigned int)bottom[0]->channels(),(unsigned int)bottom[0]->num());
-    checkreshape(input_shape,Caffe::arm_gpu_mode());
-    if (!this->init_layer_) return;
-    this->init_layer_=false;
-  // Initialize ACL.
-    if (Caffe::arm_gpu_mode()) {
-        new_gpulayer();
-    }else{
-        new_cpulayer();
-    }
-    this->force_bypass_acl_path_=false;
+    arm_compute::TensorShape input_shape((unsigned int)bottom[0]->width(), (unsigned int)bottom[0]->height(),(unsigned int)bottom[0]->channels(),(unsigned int)bottom[0]->num());
+    if (is_operator_init_done(input_shape)) return;
+    set_operator_init_done();
+
+    // Initialize ACL.
     ConvolutionParameter conv_param = this->layer_param_.convolution_param();
     int stride_x =this->stride_;
     int stride_y =this->stride_;
@@ -36,73 +30,23 @@ void ACLLocalConnectLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bott
     int pad_y=this->pad_;
     unsigned int kernel_x=this->kernel_size_;
     unsigned int kernel_y=this->kernel_size_;
-    PadStrideInfo conv_info(stride_x,stride_y,pad_x,pad_y);
-    TensorShape weights_shape(kernel_x,kernel_y,(unsigned int)this->channels_, (unsigned int)this->num_output_);
-    TensorShape biases_shape ((unsigned int)this->num_output_);
-    TensorShape output_shape((unsigned int)top[0]->width(), (unsigned int)top[0]->height(),(unsigned int)top[0]->channels(),(unsigned int)top[0]->num());
+    arm_compute::PadStrideInfo conv_info(stride_x,stride_y,pad_x,pad_y);
+    arm_compute::TensorShape weights_shape(kernel_x,kernel_y,(unsigned int)this->channels_, (unsigned int)this->num_output_);
+    arm_compute::TensorShape biases_shape ((unsigned int)this->num_output_);
+    arm_compute::TensorShape output_shape((unsigned int)top[0]->width(), (unsigned int)top[0]->height(),(unsigned int)top[0]->channels(),(unsigned int)top[0]->num());
 
-    if (Caffe::arm_gpu_mode()) {
-        Dtype *top_data = top[0]->mutable_gpu_data(); 
-        const Dtype* bottom_data = bottom[0]->gpu_data();
-        //[kernel_x, kernel_y, IFM, OFM]
-        new_tensor(this->gpu().weights,weights_shape,(void*)(this->blobs_[0].get()->mutable_gpu_data()));
-        tensor_mem(this->gpu().weights,(void*)(this->blobs_[0].get()->mutable_gpu_data()));
-        //[OFM]
-        if (this->bias_term_) {
-            new_tensor(this->gpu().biases,biases_shape,(void*)(this->blobs_[1].get()->mutable_gpu_data()));
-            tensor_mem(this->gpu().biases,(void*)(this->blobs_[1].get()->mutable_gpu_data()));
-        }
-
-        //[width, height, IFM]
-        new_tensor(this->gpu().input,input_shape,(void*)bottom_data);
-        //[width, height, OFM]
-        new_tensor(this->gpu().output,output_shape,(void*)top_data);
-#ifdef USE_PROFILING
-        {
-            logtime_util log_time(ACL_CONFIG_INFO);
-#endif //USE_PROFILING
-        this->gpu().layer->configure(this->gpu().input,this->gpu().weights,this->gpu().biases,this->gpu().output,conv_info);
-#ifdef USE_PROFILING
-        }
-#endif //USE_PROFILING
-#ifdef USE_CONV_CACHE
-        for(int i = 0; i < 16; ++i){
-            fprintf(stderr, "<GPU>check cache[%d]\n", i);
-            if(this->gpu().cache.layer[i] == nullptr){
-                this->gpu().cache.layer[i] = this->gpu().layer;
-                this->gpu().cache.input[i] = this->gpu().input;
-                this->gpu().cache.output[i] = this->gpu().output;
-                this->gpu().cache.weights[i] = this->gpu().weights;
-                this->gpu().cache.biases[i] = this->gpu().biases;
-                break;
-            }
-        }    
-#endif //USE_CONV_CACHE    		
-    }else{
-        Dtype *top_data = top[0]->mutable_cpu_data(); 
-        const Dtype* bottom_data = bottom[0]->cpu_data();
-        //[kernel_x, kernel_y, IFM, OFM]
-        new_tensor(this->cpu().weights,weights_shape,(void*)(this->blobs_[0].get()->mutable_cpu_data()));
-        tensor_mem(this->cpu().weights,(void*)(this->blobs_[0].get()->mutable_cpu_data()));
-        //[OFM]
-        if (this->bias_term_) {
-            new_tensor(this->cpu().biases,biases_shape,(void*)(this->blobs_[1].get()->mutable_cpu_data()));
-            tensor_mem(this->cpu().biases,(void*)(this->blobs_[1].get()->mutable_cpu_data()));
-        }
-
-        //[width, height, IFM]
-        new_tensor(this->cpu().input,input_shape,(void*)bottom_data);
-        //[width, height, OFM]
-        new_tensor(this->cpu().output,output_shape,(void*)top_data);
-#ifdef USE_PROFILING
-        {
-            logtime_util log_time(ACL_CONFIG_INFO);
-#endif //USE_PROFILING
-        this->cpu().layer->configure(this->cpu().input,this->cpu().weights,this->cpu().biases,this->cpu().output,conv_info);
-#ifdef USE_PROFILING
-        }
-#endif //USE_PROFILING
+    //[kernel_x, kernel_y, IFM, OFM]
+    new_tensor(weights(),weights_shape,GetDataPtr(this,this->blobs_[0].get()));
+    //[OFM]
+    if (this->bias_term_) {
+        new_tensor(biases(),biases_shape,GetDataPtr(this,this->blobs_[1].get()));
     }
+
+    //[width, height, IFM]
+    new_tensor(input(),input_shape,InputdataPtr(this,bottom));
+    //[width, height, OFM]
+    new_tensor(output(),output_shape,OutputdataPtr(this,top));
+    acl_configure(lc,this,conv_info);
 }
 template <typename Dtype>
 void ACLLocalConnectLayer<Dtype>::Reshape(
@@ -111,34 +55,37 @@ void ACLLocalConnectLayer<Dtype>::Reshape(
 }
 
 template <typename Dtype>
+bool ACLLocalConnectLayer<Dtype>::Bypass_acl(
+    const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top){
+    bool bypass_acl=false;
+    if (this->force_bypass_acl_path_) {
+        bypass_acl=true;
+    }
+
+    ConvolutionParameter conv_param = this->layer_param_.convolution_param();
+    if (conv_param.kernel_size_size()>2 ) {
+        bypass_acl=true;
+    }
+    return bypass_acl;
+}
+
+template <typename Dtype>
 void ACLLocalConnectLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
-    if(Caffe::arm_gpu_mode()){
+    if(isGPUMode()){
         Forward_gpu(bottom, top);
         return;
     }         
 #ifdef USE_PROFILING
     logtime_util log_time(ACL_LC_INFO);
 #endif //USE_PROFILING
-    if (this->force_bypass_acl_path_) {
-        LocalConnectLayer<Dtype>::Forward_cpu(bottom,top);
-        return;
-    }
-
-    ConvolutionParameter conv_param = this->layer_param_.convolution_param();
-    if (conv_param.kernel_size_size()>2 ) {
+    if (Bypass_acl(bottom,top)) {
         LocalConnectLayer<Dtype>::Forward_cpu(bottom,top);
         return;
     }
     
-    SetupACLLayer(bottom,top);
-    for (int i = 0; i < bottom.size(); ++i) {
-        const Dtype* bottom_data = bottom[i]->cpu_data();
-        Dtype* top_data = top[i]->mutable_cpu_data();
-        tensor_mem(this->cpu().input,(void*)bottom_data);
-        cpu_run();
-        tensor_mem((void*)top_data,this->cpu().output);
-  }
+    SetupACLOperator(bottom,top);
+    caffe::acl_run(this,bottom,top);
 }
 
 template <typename Dtype>
@@ -148,22 +95,12 @@ void ACLLocalConnectLayer<Dtype>::Forward_gpu(
     logtime_util log_time(ACL_LC_INFO);
 #endif //USE_PROFILING
     ConvolutionParameter conv_param = this->layer_param_.convolution_param();
-    if (this->force_bypass_acl_path_) {
+    if (Bypass_acl(bottom,top)) {
         LocalConnectLayer<Dtype>::Forward_cpu(bottom,top);
         return;
     }
-    if (conv_param.kernel_size_size()>2 ) {
-        LocalConnectLayer<Dtype>::Forward_cpu(bottom,top);
-        return;
-    }
-    SetupACLLayer(bottom,top);
-    for (int i = 0; i < bottom.size(); ++i) {
-      const Dtype* bottom_data = bottom[i]->gpu_data();
-      Dtype* top_data = top[i]->mutable_gpu_data();
-      tensor_mem(this->gpu().input,(void*)bottom_data);
-      gpu_run();
-      tensor_mem((void*)top_data,this->gpu().output);
-    }
+    SetupACLOperator(bottom,top);
+    caffe::acl_run(this,bottom,top);
 }
 
 template <typename Dtype>

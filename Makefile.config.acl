@@ -1,11 +1,11 @@
 ## Refer to http://caffe.berkeleyvision.org/installation.html
 # Contributions simplifying and improving our build system are welcome!
 
-AIDDIR=/usr/local/AID
-export PKG_CONFIG_PATH=${AIDDIR}/opencv3.3.0/lib/pkgconfig
-
 # cuDNN acceleration switch (uncomment to build with cuDNN).
 # USE_CUDNN := 1
+
+AIDDIR=/usr/local/AID
+export PKG_CONFIG_PATH=${AIDDIR}/opencv3.3.0/lib/pkgconfig
 
 # CPU-only switch (uncomment to build without GPU support).
 CPU_ONLY := 1
@@ -13,6 +13,7 @@ CPU_ONLY := 1
 USE_PROFILING := 0
 
 USE_ACL :=1
+USE_OPENCL:=1
 ACL_ROOT :=$(AIDDIR)/ComputeLibrary
 ACL_INCS :=$(ACL_ROOT)/include 
 ACL_INCS +=$(ACL_ROOT)
@@ -143,3 +144,11 @@ TEST_GPUID := 0
 
 # enable pretty build (comment to see full commands)
 Q ?= @
+
+ifeq ($(wildcard $(AIDDIR)),)
+ACL_ROOT :=$(shell pwd)/../ComputeLibrary
+ACL_INCS :=$(ACL_ROOT)/include
+ACL_INCS +=$(ACL_ROOT)
+ACL_LIBS_DIR :=$(ACL_ROOT)/build
+OPENCV_VERSION :=
+endif

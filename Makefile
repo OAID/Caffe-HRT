@@ -329,7 +329,7 @@ ifeq ($(DEBUG), 1)
 	COMMON_FLAGS += -DDEBUG -g -O0
 	NVCCFLAGS += -G
 else
-	COMMON_FLAGS += -DNDEBUG -O2
+	COMMON_FLAGS += -DNDEBUG -O3
 endif
 
 # cuDNN acceleration configuration.
@@ -350,6 +350,10 @@ ifeq ($(USE_ACL), 1)
 	LIBRARIES += $(ACL_LIBS)
 	INCLUDE_DIRS +=$(ACL_INCS)
 	COMMON_FLAGS += -DUSE_ACL -std=c++11
+endif
+
+ifeq ($(USE_OPENCL), 1)
+	COMMON_FLAGS += -DUSE_OPENCL
 endif
 
 #USE_PROFILING -- get profiling informations, is controled by LOGACL

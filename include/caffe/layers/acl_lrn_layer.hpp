@@ -10,7 +10,7 @@
 #include "caffe/layers/lrn_layer.hpp"
 
 #ifdef USE_ACL
-#include "caffe/acl_layer.hpp"
+#include "caffe/acl_operator.hpp"
 #endif
 
 namespace caffe {
@@ -21,10 +21,10 @@ namespace caffe {
  *        Fallback to LRNLayer for some corner cases.
 */
 template <typename Dtype>
-class ACLLRNLayer : public ACLBaseLayer<CLNormalizationLayer,NENormalizationLayer>,public LRNLayer<Dtype> {
+class ACLLRNLayer : public ACLOperator,public LRNLayer<Dtype> {
  public:
   explicit ACLLRNLayer(const LayerParameter& param)
-      : LRNLayer<Dtype>(param) {}
+      : ACLOperator(param),LRNLayer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -44,8 +44,9 @@ class ACLLRNLayer : public ACLBaseLayer<CLNormalizationLayer,NENormalizationLaye
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom){
 		  NOT_IMPLEMENTED;
       }
-  virtual void SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
+  virtual void SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
+  virtual bool Bypass_acl(const vector<Blob<Dtype>*>& bottom,const vector<Blob<Dtype>*>& top);
 };
 #endif
 

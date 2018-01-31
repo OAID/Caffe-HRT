@@ -13,42 +13,19 @@ void ACLSoftmaxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   this->force_bypass_acl_path_= bypass_acl_class_layer & FLAGS_ENABLE_ACL_SOFTMAX;
 }
 template <typename Dtype>
-void ACLSoftmaxLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
+void ACLSoftmaxLayer<Dtype>::SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top){
 
     unsigned int channels = bottom[0]->shape(this->softmax_axis_); 
-    TensorShape shape(channels*this->inner_num_);
-    checkreshape(shape,Caffe::arm_gpu_mode());
-    if (!this->init_layer_) return;
-    this->init_layer_=false;
+    arm_compute::TensorShape shape(channels*this->inner_num_);
+    if (is_operator_init_done(shape)) return;
+    set_operator_init_done();
 
     // Initialize ACL.
-    if (Caffe::arm_gpu_mode()) {
-        new_gpulayer();
-    }else{
-        new_cpulayer();
-    }
+    new_tensor(input(),shape,InputdataPtr(this,bottom));
+    new_tensor(output(),shape,OutputdataPtr(this,top));
+    acl_configure(softmax,this,NULL);
 
-    //this->force_bypass_acl_path_=false;
-    if (Caffe::arm_gpu_mode()) {
-        Dtype *top_data = top[0]->mutable_gpu_data(); 
-        const Dtype* bottom_data = bottom[0]->gpu_data();
-        new_tensor(this->gpu().input,shape,(void*)bottom_data);
-        new_tensor(this->gpu().output,shape,(void*)top_data);
-#ifdef USE_PROFILING
-        logtime_util log_time(ACL_CONFIG_INFO);
-#endif //USE_PROFILING
-        this->gpu().layer->configure(this->gpu().input,this->gpu().output);
-    }else{
-        Dtype *top_data = top[0]->mutable_cpu_data(); 
-        const Dtype* bottom_data = bottom[0]->cpu_data();
-        new_tensor(this->cpu().input,shape,(void*)bottom_data);
-        new_tensor(this->cpu().output,shape,(void*)top_data);
-#ifdef USE_PROFILING
-        logtime_util log_time(ACL_CONFIG_INFO);
-#endif //USE_PROFILING
-        this->cpu().layer->configure(this->cpu().input,this->cpu().output);
-    }
 }
 template <typename Dtype>
 void ACLSoftmaxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -57,29 +34,36 @@ void ACLSoftmaxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
+bool ACLSoftmaxLayer<Dtype>::Bypass_acl(const vector<Blob<Dtype>*>& bottom,const vector<Blob<Dtype>*>& top){
+    bool bypass_acl=false;
+    if (this->force_bypass_acl_path_ || this->inner_num_>1) {
+        bypass_acl=true;
+    }
+    return bypass_acl;
+}
+
+template <typename Dtype>
 void ACLSoftmaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
-  if(Caffe::arm_gpu_mode()){
+  if(isGPUMode()){
       Forward_gpu(bottom, top);
       return;
   }         
 #ifdef USE_PROFILING
     logtime_util log_time(ACL_SOFTMAX_INFO);
 #endif //USE_PROFILING
-  if (this->force_bypass_acl_path_ || this->inner_num_>1) {
+  if (Bypass_acl(bottom,top)) {
       SoftmaxLayer<Dtype>::Forward_cpu(bottom,top);
       return ;
   }
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = top[0]->mutable_cpu_data();
-  SetupACLLayer(bottom,top);
+  SetupACLOperator(bottom,top);
 
   int channels = bottom[0]->shape(this->softmax_axis_);
 
   for (int i = 0; i < this->outer_num_; ++i) {
-      tensor_mem(this->cpu().input,(void*)(bottom_data));
-      cpu_run();
-      tensor_mem((void*)(top_data),this->cpu().output);
+      acl_run((void*)bottom_data,(void*)top_data);
       top_data += channels;
       bottom_data += channels;
   }
@@ -91,17 +75,15 @@ void ACLSoftmaxLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 #ifdef USE_PROFILING
   logtime_util log_time(ACL_SOFTMAX_INFO);
 #endif //USE_PROFILING
-  if (this->force_bypass_acl_path_|| this->inner_num_>1) {
+  if (Bypass_acl(bottom,top)) {
         SoftmaxLayer<Dtype>::Forward_cpu(bottom,top);
         return;
   }
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
-  SetupACLLayer(bottom,top);
+  SetupACLOperator(bottom,top);
   for (int i = 0; i < this->outer_num_; ++i) {
-      tensor_mem(this->gpu().input,(void*)(bottom_data));
-      gpu_run();
-      tensor_mem((void*)(top_data),this->gpu().output);
+      acl_run((void*)bottom_data,(void*)top_data);
       top_data += this->inner_num_;
       bottom_data += this->inner_num_;
   }

@@ -10,7 +10,7 @@
 #include "caffe/layers/softmax_layer.hpp"
 
 #ifdef USE_ACL
-#include "caffe/acl_layer.hpp"
+#include "caffe/acl_operator.hpp"
 #endif
 
 namespace caffe {
@@ -21,10 +21,10 @@ namespace caffe {
  *        Fallback to SoftmaxLayer for some corner cases.
  */
 template <typename Dtype>
-class ACLSoftmaxLayer : public ACLBaseLayer<CLSoftmaxLayer,NESoftmaxLayer>,public SoftmaxLayer<Dtype> {
+class ACLSoftmaxLayer : public ACLOperator,public SoftmaxLayer<Dtype> {
  public:
   explicit ACLSoftmaxLayer(const LayerParameter& param)
-      : SoftmaxLayer<Dtype>(param) {}
+      : ACLOperator(param),SoftmaxLayer<Dtype>(param) {}
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -44,8 +44,9 @@ class ACLSoftmaxLayer : public ACLBaseLayer<CLSoftmaxLayer,NESoftmaxLayer>,publi
      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom){
 		  NOT_IMPLEMENTED;
       }
-  virtual void SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
+  virtual void SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
+  virtual bool Bypass_acl(const vector<Blob<Dtype>*>& bottom,const vector<Blob<Dtype>*>& top);
 };
 #endif
 

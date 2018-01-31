@@ -5,7 +5,7 @@
 
 namespace caffe {
 
-const NormType IN_MAP=(arm_compute::NormType)0;
+const arm_compute::NormType IN_MAP=(arm_compute::NormType)0;
 template <typename Dtype>
 void ACLLRNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
@@ -13,46 +13,24 @@ void ACLLRNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   this->force_bypass_acl_path_= bypass_acl_class_layer & FLAGS_ENABLE_ACL_LRN;
 }
 template <typename Dtype>
-void ACLLRNLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
+void ACLLRNLayer<Dtype>::SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top){
 
-    TensorShape shape((unsigned int)this->width_,(unsigned int)this->height_, (unsigned int)this->channels_);
-    checkreshape(shape,Caffe::arm_gpu_mode());
-    if (!this->init_layer_) return;
+    arm_compute::TensorShape shape((unsigned int)this->width_,(unsigned int)this->height_, (unsigned int)this->channels_);
+    if (is_operator_init_done(shape)) return;
+    set_operator_init_done();
+
     // Initialize ACL.
-    if (Caffe::arm_gpu_mode()) {
-        new_gpulayer();
-    }else{
-        new_cpulayer();
-    }
-
-    //this->force_bypass_acl_path_=false;
-    NormalizationLayerInfo *norm_info;
+    arm_compute::NormalizationLayerInfo norm_info(IN_MAP, this->size_, this->alpha_, this->beta_, this->k_);
     if(this->layer_param_.lrn_param().norm_region() == LRNParameter_NormRegion_WITHIN_CHANNEL)
-       norm_info=new NormalizationLayerInfo(IN_MAP, this->size_, this->alpha_, this->beta_, this->k_);
+       norm_info=arm_compute::NormalizationLayerInfo(IN_MAP, this->size_, this->alpha_, this->beta_, this->k_);
     else
-       norm_info=new NormalizationLayerInfo(NormType::CROSS_MAP, this->size_, this->alpha_, this->beta_, this->k_);
+       norm_info=arm_compute::NormalizationLayerInfo(arm_compute::NormType::CROSS_MAP, this->size_, this->alpha_, this->beta_, this->k_);
 
-    if (Caffe::arm_gpu_mode()) {
-        Dtype *top_data = top[0]->mutable_gpu_data(); 
-        const Dtype* bottom_data = bottom[0]->gpu_data();
-        new_tensor(this->gpu().input,shape,(void*)bottom_data);
-        new_tensor(this->gpu().output,shape,(void*)top_data);
-#ifdef USE_PROFILING
-        logtime_util log_time(ACL_CONFIG_INFO);
-#endif //USE_PROFILING
-        this->gpu().layer->configure(this->gpu().input,this->gpu().output,*norm_info);
-    }else{
-        Dtype *top_data = top[0]->mutable_cpu_data(); 
-        const Dtype* bottom_data = bottom[0]->cpu_data();
-        new_tensor(this->cpu().input,shape,(void*)bottom_data);
-        new_tensor(this->cpu().output,shape,(void*)top_data);
-#ifdef USE_PROFILING
-        logtime_util log_time(ACL_CONFIG_INFO);
-#endif //USE_PROFILING
-        this->cpu().layer->configure(this->cpu().input,this->cpu().output,*norm_info);
-    }
-    delete norm_info;
+    new_tensor(input(),shape,InputdataPtr(this,bottom));
+    new_tensor(output(),shape,OutputdataPtr(this,top));
+    acl_configure(lrn,this,norm_info);
+
 }
 template <typename Dtype>
 void ACLLRNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -62,35 +40,41 @@ void ACLLRNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
+bool ACLLRNLayer<Dtype>::Bypass_acl(const vector<Blob<Dtype>*>& bottom,
+    const vector<Blob<Dtype>*>& top){
+    bool bypass_acl=false;
+    if (this->force_bypass_acl_path_ || this->layer_param_.lrn_param().norm_region() == LRNParameter_NormRegion_WITHIN_CHANNEL) {
+        bypass_acl=true;
+    }
+    return bypass_acl;
+}
+
+template <typename Dtype>
 void ACLLRNLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
-  if(Caffe::arm_gpu_mode()){
+  if(isGPUMode()){
     Forward_gpu(bottom, top);
     return;
   }         
 #ifdef USE_PROFILING
   logtime_util log_time(ACL_LRN_INFO);
 #endif //USE_PROFILING
-  if (this->force_bypass_acl_path_ || this->layer_param_.lrn_param().norm_region() == LRNParameter_NormRegion_WITHIN_CHANNEL) {
+  if (Bypass_acl(bottom, top)) {
       LRNLayer<Dtype>::Forward_cpu(bottom,top);
       return;
   }
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = top[0]->mutable_cpu_data();
-  SetupACLLayer(bottom,top);
+  SetupACLOperator(bottom,top);
   switch (this->layer_param_.lrn_param().norm_region()) {
   case LRNParameter_NormRegion_ACROSS_CHANNELS:
       for (int n = 0; n < this->num_; ++n) {
-          tensor_mem(this->cpu().input,(void*)(bottom_data+ bottom[0]->offset(n)));
-          cpu_run();
-          tensor_mem((void*)(top_data + top[0]->offset(n)),this->cpu().output);
+          acl_run((void*)(bottom_data+ bottom[0]->offset(n)),(void*)(top_data + top[0]->offset(n)));
       }
     break;
   case LRNParameter_NormRegion_WITHIN_CHANNEL:
       for (int n = 0; n < bottom[0]->num(); ++n) {
-            tensor_mem(this->cpu().input,(void*)(bottom_data));
-            cpu_run();
-            tensor_mem((void*)(top_data),this->cpu().output);
+            acl_run((void*)bottom_data,(void*)top_data);
             bottom_data += bottom[0]->offset(0, 1);
             top_data += top[0]->offset(0, 1);
       }
@@ -106,26 +90,22 @@ void ACLLRNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 #ifdef USE_PROFILING
   logtime_util log_time(ACL_LRN_INFO);
 #endif //USE_PROFILING
-  if (this->force_bypass_acl_path_) {
+  if (Bypass_acl(bottom, top)) {
        LRNLayer<Dtype>::Forward_cpu(bottom,top);
        return;
   }
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
-  SetupACLLayer(bottom,top);
+  SetupACLOperator(bottom,top);
   switch (this->layer_param_.lrn_param().norm_region()) {
   case LRNParameter_NormRegion_ACROSS_CHANNELS:
       for (int n = 0; n < this->num_; ++n) {
-          tensor_mem(this->gpu().input,(void*)(bottom_data+ bottom[0]->offset(n)));
-          gpu_run();
-          tensor_mem((void*)(top_data + top[0]->offset(n)),this->gpu().output);
+          acl_run((void*)(bottom_data+ bottom[0]->offset(n)),(void*)(top_data + top[0]->offset(n)));
       }
     break;
   case LRNParameter_NormRegion_WITHIN_CHANNEL:
       for (int n = 0; n < bottom[0]->num(); ++n) {
-            tensor_mem(this->gpu().input,(void*)(bottom_data));
-            gpu_run();
-            tensor_mem((void*)(top_data),this->gpu().output);
+            acl_run((void*)bottom_data,(void*)top_data);
             bottom_data += bottom[0]->offset(0, 1);
             top_data += top[0]->offset(0, 1);
       }

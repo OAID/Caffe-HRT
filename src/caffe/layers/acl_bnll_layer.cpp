@@ -14,9 +14,9 @@ void ACLBNLLLayer<Dtype>::LayerSetUp(
   this->force_bypass_acl_path_= bypass_acl_class_layer & FLAGS_ENABLE_ACL_BNLL;
 }
 template <typename Dtype>
-void ACLBNLLLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top, ActivationLayerInfo::ActivationFunction type){
-    ACLBaseActivationLayer<Dtype>::SetupACLLayer(bottom, top,ActivationLayerInfo::ActivationFunction::SOFT_RELU);
+void ACLBNLLLayer<Dtype>::SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top, arm_compute::ActivationLayerInfo::ActivationFunction type){
+    ACLBaseActivationLayer<Dtype>::SetupACLOperator(bottom, top,arm_compute::ActivationLayerInfo::ActivationFunction::SOFT_RELU);
 }
 template <typename Dtype>
 void ACLBNLLLayer<Dtype>::Reshape(
@@ -26,12 +26,21 @@ void ACLBNLLLayer<Dtype>::Reshape(
 }
 
 template <typename Dtype>
+bool ACLBNLLLayer<Dtype>::Bypass_acl(const vector<Blob<Dtype>*>& bottom,const vector<Blob<Dtype>*>& top){
+    bool bypass_acl=false;
+    if (this->force_bypass_acl_path_) {
+        bypass_acl=true;
+    }
+    return bypass_acl;
+}
+
+template <typename Dtype>
 void ACLBNLLLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
 #ifdef USE_PROFILING
     logtime_util log_time(ACL_BNLL_INFO);
 #endif //USE_PROFILING
-    if (this->force_bypass_acl_path_) {
+    if (Bypass_acl(bottom,top)) {
         BNLLLayer<Dtype>::Forward_cpu(bottom,top);
         return;
     }
@@ -44,7 +53,7 @@ void ACLBNLLLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 #ifdef USE_PROFILING
     logtime_util log_time(ACL_BNLL_INFO);
 #endif //USE_PROFILING
-    if (this->force_bypass_acl_path_) {
+    if (Bypass_acl(bottom,top)) {
         BNLLLayer<Dtype>::Forward_cpu(bottom,top);
         return;
     }

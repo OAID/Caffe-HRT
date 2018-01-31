@@ -1,5 +1,4 @@
 
-
 # CaffeOnACL
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
@@ -11,9 +10,10 @@ The release version is 0.4.0, is based on [Rockchip RK3399](http://www.rock-chip
 * Caffe is a fast open framework for deep learning. See also [Caffe](https://github.com/BVLC/caffe).
 
 ### Documents
-* [Installation instructions](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/installation.md)
-* [User Manuals PDF](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/user_manual.pdf)
-* [Performance Report PDF](https://github.com/OAID/CaffeOnACL/blob/master/acl_openailab/performance_report.pdf)
+* [Installation instructions](acl_openailab/installation.md)
+* [User Manuals PDF](acl_openailab/user_manual.pdf)
+* [Performance Report PDF](acl_openailab/performance_report.pdf)
+* [Accuracy Report PDF](acl_openailab/accuracy_report.pdf)
 
 ### Arm Compute Library Compatibility Issues :
 There are some compatibility issues between ACL and Caffe Layers, we bypass it to Caffe's original layer class as the workaround solution for the below issues

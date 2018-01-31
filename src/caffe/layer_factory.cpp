@@ -56,7 +56,7 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
   ConvolutionParameter conv_param = param.convolution_param();
   ConvolutionParameter_Engine engine = conv_param.engine();
 #ifdef USE_ACL
-  return GetACLConvolutionLayer<Dtype>(param);
+  return shared_ptr<Layer<Dtype> >(new ACLConvolutionLayer<Dtype>(param));
 #endif  
 #ifdef USE_CUDNN
   bool use_dilation = false;

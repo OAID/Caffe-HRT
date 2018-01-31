@@ -14,9 +14,9 @@ void ACLSigmoidLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-void ACLSigmoidLayer<Dtype>::SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top,ActivationLayerInfo::ActivationFunction type){
-    ACLBaseActivationLayer<Dtype>::SetupACLLayer(bottom, top,ActivationLayerInfo::ActivationFunction::LOGISTIC);
+void ACLSigmoidLayer<Dtype>::SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top,arm_compute::ActivationLayerInfo::ActivationFunction type){
+    ACLBaseActivationLayer<Dtype>::SetupACLOperator(bottom, top,arm_compute::ActivationLayerInfo::ActivationFunction::LOGISTIC);
 }
 template <typename Dtype>
 void ACLSigmoidLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -26,12 +26,21 @@ void ACLSigmoidLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
+bool ACLSigmoidLayer<Dtype>::Bypass_acl(const vector<Blob<Dtype>*>& bottom,const vector<Blob<Dtype>*>& top){
+    bool bypass_acl=false;
+    if (this->force_bypass_acl_path_) {
+        bypass_acl=true;
+    }
+    return bypass_acl;
+}
+
+template <typename Dtype>
 void ACLSigmoidLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
 #ifdef USE_PROFILING
     logtime_util log_time(ACL_SIGMOID_INFO);
 #endif //USE_PROFILING
-    if (this->force_bypass_acl_path_) {
+    if (Bypass_acl(bottom,top)) {
         SigmoidLayer<Dtype>::Forward_cpu(bottom,top);
         return;
     }
@@ -44,7 +53,7 @@ void ACLSigmoidLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 #ifdef USE_PROFILING
     logtime_util log_time(ACL_SIGMOID_INFO);
 #endif //USE_PROFILING
-    if (this->force_bypass_acl_path_) {
+    if (Bypass_acl(bottom,top)) {
         SigmoidLayer<Dtype>::Forward_cpu(bottom,top);
         return;
     }

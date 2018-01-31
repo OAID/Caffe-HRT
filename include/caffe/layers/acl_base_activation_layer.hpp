@@ -10,7 +10,7 @@
 #include "caffe/layers/neuron_layer.hpp"
 
 #ifdef USE_ACL
-#include "caffe/acl_layer.hpp"
+#include "caffe/acl_operator.hpp"
 #include "caffe/layers/acl_base_activation_layer.hpp"
 #endif
 
@@ -23,9 +23,9 @@ namespace caffe {
  *        Fallback to BNLLLayer for some corner cases. 
  */
 template <typename Dtype>
-class ACLBaseActivationLayer : public ACLBaseLayer<CLActivationLayer,NEActivationLayer> {
+class ACLBaseActivationLayer : public ACLOperator {
  public:
-  explicit ACLBaseActivationLayer(const LayerParameter& param)
+  explicit ACLBaseActivationLayer(const LayerParameter& param):ACLOperator(param)
       {}
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
@@ -46,8 +46,8 @@ class ACLBaseActivationLayer : public ACLBaseLayer<CLActivationLayer,NEActivatio
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom){
 		  NOT_IMPLEMENTED;
       }
-  virtual void SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top,ActivationLayerInfo::ActivationFunction type=ActivationLayerInfo::ActivationFunction::RELU);
+  virtual void SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top,arm_compute::ActivationLayerInfo::ActivationFunction type=arm_compute::ActivationLayerInfo::ActivationFunction::RELU);
 };
 #endif
 

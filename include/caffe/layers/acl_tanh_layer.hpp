@@ -11,7 +11,7 @@
 #include "caffe/layers/tanh_layer.hpp"
 
 #ifdef USE_ACL
-#include "caffe/acl_layer.hpp"
+#include "caffe/acl_operator.hpp"
 #include "caffe/layers/acl_base_activation_layer.hpp"
 #endif
 
@@ -46,8 +46,9 @@ class ACLTanHLayer : public ACLBaseActivationLayer<Dtype>,public TanHLayer<Dtype
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom){
 		  NOT_IMPLEMENTED;
       }
-  virtual void SetupACLLayer(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top, ActivationLayerInfo::ActivationFunction type);
+  virtual void SetupACLOperator(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top, arm_compute::ActivationLayerInfo::ActivationFunction type);
+  virtual bool Bypass_acl(const vector<Blob<Dtype>*>& bottom,const vector<Blob<Dtype>*>& top);
 };
 #endif
 

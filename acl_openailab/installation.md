@@ -21,10 +21,11 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	wget --no-check-certificate https://github.com/opencv/opencv/archive/3.3.0.tar.gz
 	tar -xvf 3.3.0.tar.gz
 #### Download "gen-pkg-config-pc" 
-	wget https://github.com/OAID/AID-tools/raw/master/script/gen-pkg-config-pc.sh
+	wget ftp://ftp.openailab.net/tools/script/gen-pkg-config-pc.sh
+	chmod +x ./gen-pkg-config-pc.sh
 #### Download "ACL" 
 	git clone https://github.com/ARM-software/ComputeLibrary.git
-	git checkout bf8b01d
+	git checkout 48bc34e
 #### Download "CaffeOnACL" :
 	git clone https://github.com/OAID/CaffeOnACL.git
 #### Download "Googletest" :
@@ -45,14 +46,16 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	mkdir build
     aarch64-linux-gnu-gcc opencl-1.2-stubs/opencl_stubs.c -Iinclude -shared -o build/libOpenCL.so
 	scons Werror=1 -j4 debug=0 asserts=1 neon=1 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
-	wget https://github.com/OAID/AID-tools/raw/master/script/Computelibrary/Makefile
+	wget ftp://ftp.openailab.net/tools/script/Computelibrary/Makefile
 	sudo make install
+	sudo ~/gen-pkg-config-pc.sh /usr/local/AID
 
 ## 3.3 Build Caffe :
 	cd ~/CaffeOnACL
 	make all 
 	make distribute
 	sudo make install
+	sudo ~/gen-pkg-config-pc.sh /usr/local/AID
 
 ## 3.4 Build Unit tests
 ##### Build the gtest libraries
