@@ -89,7 +89,6 @@ Classifier::Classifier(const string& model_file,
   Caffe::set_mode(Caffe::GPU);
 #endif
 
-  AclEnableSchedule();
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
