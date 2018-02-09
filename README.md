@@ -39,10 +39,12 @@ Support Arm Compute Library version 17.09
 
 ### Version 0.3.0 - Aug 26, 2017
 Support Arm Compute Library version 17.06 with 4 new layers added
+
 * Batch Normalization Layer
 * Direct convolution Layer
 * Locally Connect Layer
 * Concatenate layer
+
 
 ### Version 0.2.0 - Jul 2, 2017
 

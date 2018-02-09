@@ -1,7 +1,7 @@
 # 1. User Quick Guide
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
-This Installation will help you get started to setup CaffeOnACL on RK3399 quickly.
+This Installation will help you get started to setup Caffe-HRT on RK3399 quickly.
 
 # 2. Preparation
 ## 2.1 General dependencies installation
@@ -26,12 +26,12 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 #### Download "ACL" 
 	git clone https://github.com/ARM-software/ComputeLibrary.git
 	git checkout 48bc34e
-#### Download "CaffeOnACL" :
-	git clone https://github.com/OAID/CaffeOnACL.git
+#### Download "Caffe-HRT" :
+	git clone https://github.com/OAID/Caffe-HRT.git
 #### Download "Googletest" :
 	git clone https://github.com/google/googletest.git
 
-# 3. Build CaffeOnACL
+# 3. Build Caffe-HRT
 
 ## 3.1 Build OpenCV :
 	cd ~/opencv-3.3.0
@@ -51,8 +51,8 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	sudo ~/gen-pkg-config-pc.sh /usr/local/AID
 
 ## 3.3 Build Caffe :
-	cd ~/CaffeOnACL
-	make all 
+	cd ~/Caffe-HRT
+	make all
 	make distribute
 	sudo make install
 	sudo ~/gen-pkg-config-pc.sh /usr/local/AID
@@ -65,7 +65,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	sudo make install
 
 ##### Build Caffe Unit tests
-	cd ~/CaffeOnACL/unit_tests
+	cd ~/Caffe-HRT/unit_tests
 	make clean
 	make
 
@@ -75,7 +75,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 # 4. Run tests
 
 #### 4.1 Run Caffenet
-	cd  ~/CaffeOnACL/data/ilsvrc12
+	cd  ~/Caffe-HRT/data/ilsvrc12
 	sudo chmod +x get_ilsvrc_aux.sh
 	./get_ilsvrc_aux.sh
 	cd ../..
@@ -90,7 +90,7 @@ This Installation will help you get started to setup CaffeOnACL on RK3399 quickl
 	  0.0421 - "n02085620 Chihuahua"
 
 #### 4.2 Run Unit test
-	  cd ~/CaffeOnACL/unit_tests
+	  cd ~/Caffe-HRT/unit_tests
 	  ./test_caffe_main
 	  output message:
 	    [==========] 29 tests from 6 test cases ran. (1236 ms total) [ PASSED ] 29 tests.

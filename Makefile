@@ -504,9 +504,9 @@ endif
 all: lib tools examples
 
 install:
-	install -d $(AIDDIR)/CaffeOnACL
-	cp -rfp ./distribute/* $(AIDDIR)/CaffeOnACL
-	chown -R root:root $(AIDDIR)/CaffeOnACL
+	install -d $(AIDDIR)/Caffe-HRT
+	cp -rfp ./distribute/* $(AIDDIR)/Caffe-HRT
+	chown -R root:root $(AIDDIR)/Caffe-HRT
 
 lib: $(STATIC_NAME) $(DYNAMIC_NAME)
 
