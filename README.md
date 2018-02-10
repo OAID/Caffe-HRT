@@ -1,10 +1,10 @@
 
-# CaffeOnACL
+# Caffe-HRT
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
-CaffeOnACL is a project that is maintained by **OPEN** AI LAB, it uses Arm Compute Library (NEON+GPU) to speed up [Caffe](http://caffe.berkeleyvision.org/) and provide utilities to debug, profile and tune application performance. 
+Caffe-HRT is a project that is maintained by **OPEN** AI LAB, it uses heterogeneous computing infrastructure framework to speed up [Caffe](http://caffe.berkeleyvision.org/) and provide utilities to debug, profile and tune application performance. 
 
-The release version is 0.5.0, is based on [Rockchip RK3399](http://www.rock-chips.com/plus/3399.html) Platform, target OS is Ubuntu 16.04. Can download the source code from [OAID/CaffeOnACL](https://github.com/OAID/CaffeOnACL)
+The release version is 0.5.0, is based on [Rockchip RK3399](http://www.rock-chips.com/plus/3399.html) Platform, target OS is Ubuntu 16.04. Can download the source code from [OAID/Caffe-HRT](https://github.com/OAID/Caffe-HRT)
 
 * The ARM Computer Vision and Machine Learning library is a set of functions optimised for both ARM CPUs and GPUs using SIMD technologies. See also [Arm Compute Library](https://github.com/ARM-software/ComputeLibrary).
 * Caffe is a fast open framework for deep learning. See also [Caffe](https://github.com/BVLC/caffe).
@@ -69,7 +69,7 @@ Fix the issues:
 * InnerProduct Layer
 
 # Issue Report
-Encounter any issue, please report on [issue report](https://github.com/OAID/CaffeOnACL/issues). Issue report should contain the following information :
+Encounter any issue, please report on [issue report](https://github.com/OAID/Caffe-HRT/issues). Issue report should contain the following information :
 
 *  The exact description of the steps that are needed to reproduce the issue 
 * The exact description of what happens and what you think is wrong 
