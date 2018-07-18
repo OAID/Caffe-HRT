@@ -53,7 +53,10 @@ void GlobalInit(int* pargc, char*** pargv) {
 #ifdef CPU_ONLY  // CPU-only Caffe.
 
 Caffe::Caffe()
-    : random_generator_(), mode_(Caffe::CPU),use_mali_gpu_(false),
+    : random_generator_(), mode_(Caffe::CPU),
+#ifdef USE_ACL
+	use_mali_gpu_(false),
+#endif
       solver_count_(1), solver_rank_(0), multiprocess_(false)
    {
 }

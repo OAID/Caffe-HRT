@@ -22,7 +22,9 @@ extern unsigned int acl_log_flags;
 namespace boost { class mutex; }
 
 namespace caffe {
+#ifdef USE_ACL
 bool AclEnableSchedule(int enable=1);
+#endif
 #ifdef USE_PROFILING
 class logtime_util
 {
