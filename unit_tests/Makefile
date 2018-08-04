@@ -16,7 +16,7 @@ HOME=$(AIDDIR)
 #  caffe related stuff
 #
 
-CAFFE_ROOT=$(HOME)/CaffeOnACL
+CAFFE_ROOT=$(HOME)/Caffe-HRT
 
 CAFFE_INCS = -I$(CAFFE_ROOT)/include -I$(CAFFE_ROOT)/include/
 CAFFE_LIBS = -L$(CAFFE_ROOT)/lib -lcaffe  -lglog -lgflags -lprotobuf -lboost_system -lboost_filesystem
